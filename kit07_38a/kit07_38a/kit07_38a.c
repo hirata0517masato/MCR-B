@@ -22,7 +22,7 @@
 /*======================================*/
 
 /* 定数設定 */
-#define PWM_CYCLE       29999           /* モータPWMの周期   初期値39999  */
+#define PWM_CYCLE       2499           /* モータPWMの周期   初期値39999  */
 #define SERVO_CENTER    4170            /* サーボのセンタ値             */
 #define HANDLE_STEP     22              /* 1゜分の値                    */
 
@@ -66,6 +66,7 @@ unsigned long   run_time = 0;
 int             pattern;                /* パターン番号                 */
 
 int S_angle = 0;
+int angle_buf = 0;
 
 unsigned char sensor_old = 0;
 unsigned long S_angle_cnt = 0;
@@ -204,7 +205,7 @@ void main( void )
 			
 			case 0x1C://000 1 100
                 /* 微妙に左寄り→右へ微曲げ */
-				if(S_angle_cnt > 15){
+				if(S_angle_cnt > 1){
 					S_angle_cnt = 0;
 					S_angle += 1;
 				}
@@ -217,7 +218,7 @@ void main( void )
                 /* 微妙に左寄り→右へ微曲げ */
                 //handle2( 8 * HANDLE_STEP + S_angle);
 				
-				if(S_angle_cnt > 8){
+				if(S_angle_cnt > 1){
 					S_angle_cnt = 0;
 					S_angle += 1;
 				}
@@ -248,9 +249,9 @@ void main( void )
 
 			///////////////////////////////////////////////////////
 			
-			case 0x30://001 1 000
+			case 0x38://001 1 000
                 /* 微妙に右寄り→左へ微曲げ */
-				if(S_angle_cnt > 15){
+				if(S_angle_cnt > 1){
 					S_angle_cnt = 0;
 					S_angle -= 1;
 				}
@@ -263,7 +264,7 @@ void main( void )
                 /* 微妙に右寄り→左へ微曲げ */
                 //handle2( -5 * HANDLE_STEP + S_angle);
 				
-				if(S_angle_cnt > 8){
+				if(S_angle_cnt > 1){
 					S_angle_cnt = 0;
 					S_angle -= 1;
 				}
@@ -838,7 +839,7 @@ void init( void )
     trdgra0 = trdgrc0 = PWM_CYCLE;      /* 周期                         */
     trdgrb0 = trdgrd0 = 0;              /* P2_2端子のON幅設定           */
     trdgra1 = trdgrc1 = 0;              /* P2_4端子のON幅設定           */
-    trdgrb1 = trdgrd1 = SERVO_CENTER;   /* P2_5端子のON幅設定           */
+    trdgrb1 = trdgrd1 = PWM_CYCLE/2;   /* P2_5端子のON幅設定           */
     trdoer1 = 0xcd;                     /* 出力端子の選択               */
     trdstr  = 0x0d;                     /* TRD0カウント開始             */
 }
@@ -849,6 +850,8 @@ void init( void )
 #pragma interrupt intTRB(vect=24)
 void intTRB( void )
 {
+	static int servo_cnt = 0,servo_angle = 0;
+		
     cnt0++;
     cnt1++;
 	run_time++;
@@ -856,6 +859,20 @@ void intTRB( void )
 	LR_cnt++;
 	S_angle_cnt++;
 	OUT_cnt++;
+	
+	
+	if(servo_cnt == 0){
+		servo_angle = angle_buf ;	
+	}
+	
+	if(servo_angle >= (PWM_CYCLE+1)) trdgrd1 = PWM_CYCLE+1;
+	else trdgrd1 = servo_angle;
+			
+	servo_angle -=  PWM_CYCLE+1;
+	if(servo_angle <= 0)servo_angle = 0;
+	
+	servo_cnt++;
+	if(servo_cnt >= 12)servo_cnt = 0;
 }
 
 /************************************************************************/
@@ -1042,13 +1059,15 @@ void motor( int accele_l, int accele_r )
 void handle( int angle )
 {
     /* サーボが左右逆に動く場合は、「-」を「+」に替えてください */
-    trdgrd1 = SERVO_CENTER - angle * HANDLE_STEP;
+    //trdgrd1 = SERVO_CENTER - angle * HANDLE_STEP;
+	angle_buf = SERVO_CENTER - angle * HANDLE_STEP;
 }
 
 void handle2( int angle )
 {
     /* サーボが左右逆に動く場合は、「-」を「+」に替えてください */
-    trdgrd1 = SERVO_CENTER - angle;
+    //trdgrd1 = SERVO_CENTER - angle;
+	angle_buf = SERVO_CENTER - angle;
 }
 
 

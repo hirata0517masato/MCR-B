@@ -31,15 +31,23 @@
 /* シンボル定義                         */
 /*======================================*/
 
+/* 定数設定 */
+#define PWM_CYCLE       2499           /* モータPWMの周期   初期値39999  */
+#define SERVO_CENTER    4170            /* サーボのセンタ値             */
+#define HANDLE_STEP     22              /* 1゜分の値                    */
+
 /*======================================*/
 /* プロトタイプ宣言                     */
 /*======================================*/
 void init( void );
+void handle( int angle );
 
 /*======================================*/
 /* グローバル変数の宣言                 */
 /*======================================*/
 unsigned int    servo_offset;           /* サーボオフセット             */
+int angle_buf = 0;
+
 
 /************************************************************************/
 /* メインプログラム                                                     */
@@ -53,8 +61,11 @@ void main( void )
     init();                             /* 初期化                       */
     init_uart0_printf( SPEED_9600 );    /* UART0とprintf関連の初期化    */
     asm(" fset I ");                    /* 全体の割り込み許可           */
-
-    servo_offset = 3750;
+	handle( SERVO_CENTER );
+	
+	
+    servo_offset = SERVO_CENTER;
+	
     printf(
         "Servo Center Adjustment Soft\n"
         "'Z' key   : Center Value +1\n"
@@ -67,8 +78,8 @@ void main( void )
     printf( "%5d\r", servo_offset );
 
     while( 1 ) {
-        trdgrd1 = servo_offset;
-
+		handle( servo_offset );
+		
         i = get_uart0( &c );
         if( i == 1 ) {
             switch( c ) {
@@ -138,6 +149,17 @@ void init( void )
     pd9 = 0x3f;                         /*                              */
     pur0 = 0x04;                        /* P1_3～P1_0のプルアップON     */
 
+	/* タイマRBの設定 */
+    /* 割り込み周期 = 1 / 20[MHz]   * (TRBPRE+1) * (TRBPR+1)
+                    = 1 / (20*10^6) * 200        * 100
+                    = 0.001[s] = 1[ms]
+    */
+    trbmr  = 0x00;                      /* 動作モード、分周比設定       */
+    trbpre = 200-1;                     /* プリスケーラレジスタ         */
+    trbpr  = 100-1;                     /* プライマリレジスタ           */
+    trbic  = 0x07;                      /* 割り込み優先レベル設定       */
+    trbcr  = 0x01;                      /* カウント開始                 */
+	
     /* タイマRD リセット同期PWMモードの設定*/
     /* PWM周期 = 1 / 20[MHz]   * カウントソース * (TRDGRA0+1)
                = 1 / (20*10^6) * 8              * 40000
@@ -148,14 +170,52 @@ void init( void )
     trdmr   = 0xf0;                     /* バッファレジスタ設定         */
     trdfcr  = 0x01;                     /* リセット同期PWMモードに設定  */
     trdcr0  = 0x23;                     /* ソースカウントの選択:f8      */
-    trdgra0 = trdgrc0 = 39999;          /* 周期                         */
+    trdgra0 = trdgrc0 = PWM_CYCLE;          /* 周期                         */
     trdgrb0 = trdgrd0 = 0;              /* P2_2端子のON幅設定           */
     trdgra1 = trdgrc1 = 0;              /* P2_4端子のON幅設定           */
-    trdgrb1 = trdgrd1 = 3750;           /* P2_5端子のON幅設定           */
+    trdgrb1 = trdgrd1 = PWM_CYCLE/2;           /* P2_5端子のON幅設定           */
     trdoer1 = 0xcd;                     /* 出力端子の選択               */
     trdstr  = 0x0d;                     /* TRD0カウント開始             */
 }
 
+
+/************************************************************************/
+/* タイマRB 割り込み処理                                                */
+/************************************************************************/
+#pragma interrupt intTRB(vect=24)
+void intTRB( void )
+{
+	static int servo_cnt = 0,servo_angle = 0;
+	
+  
+	
+	
+	if(servo_cnt == 0){
+		servo_angle = angle_buf ;	
+	}
+	
+	if(servo_angle >= (PWM_CYCLE+1)) trdgrd1 = PWM_CYCLE+1;
+	else trdgrd1 = servo_angle;
+			
+	servo_angle -=  PWM_CYCLE+1;
+	if(servo_angle <= 0)servo_angle = 0;
+	
+	servo_cnt++;
+	if(servo_cnt >= 12)servo_cnt = 0;
+}
+
+
+/************************************************************************/
+/* サーボハンドル操作                                                   */
+/* 引数　 サーボ操作角度：-90～90                                       */
+/*        -90で左へ90度、0でまっすぐ、90で右へ90度回転                  */
+/************************************************************************/
+void handle( int angle )
+{
+    /* サーボが左右逆に動く場合は、「-」を「+」に替えてください */
+    //trdgrd1 = SERVO_CENTER - angle * HANDLE_STEP;
+	angle_buf = angle; //SERVO_CENTER - angle * HANDLE_STEP;
+}
 /************************************************************************/
 /* end of file                                                          */
 /************************************************************************/
