@@ -8,10 +8,14 @@
 [BREAKPOINTS]
 [OPEN_WORKSPACE_FILES]
 "C:\WorkSpace\kit07_38a\kit07_38a\kit07_38a.c" 
+"C:\WorkSpace\kit07_38a\kit07test_38a\kit07test_38a.c" 
 "C:\WorkSpace\kit07_38a\sioservo1_38a\sioservo1_38a.c" 
 [WORKSPACE_FILE_STATES]
 "C:\WorkSpace\kit07_38a\kit07_38a\kit07_38a.c" -8 -31 1275 605 1 0 
+"C:\WorkSpace\kit07_38a\kit07test_38a\kit07test_38a.c" 52 52 1103 380 0 2 
 "C:\WorkSpace\kit07_38a\sioservo1_38a\sioservo1_38a.c" 78 78 1077 384 0 1 
 [LOADED_PROJECTS]
 "kit07_38a" 
+"kit07test_38a" 
+"sioservo1_38a" 
 [END]

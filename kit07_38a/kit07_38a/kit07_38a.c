@@ -89,8 +89,9 @@ void main( void )
 
     /* マイコンカーの状態初期化 */
     handle( 0 );
-    motor( 0, 0 );
+	motor( 0, 0 );
 
+	
     while( 1 ) {
 		
 	if(pattern > 10 && run_time > RUN_TIME){
@@ -198,19 +199,23 @@ void main( void )
         switch( sensor_inp(MASK4_4) ) {
             case 0x18: //000 1 000
                 /* センタ→まっすぐ */
-                handle2( S_angle );
+                //handle2( S_angle );
+				
+				handle( 0 );
                 motor( 100 ,100 );
                 break;
 			///////////////////////////////////////////////////////////
 			
 			case 0x1C://000 1 100
                 /* 微妙に左寄り→右へ微曲げ */
-				if(S_angle_cnt > 1){
+			/*	if(S_angle_cnt > 10){
 					S_angle_cnt = 0;
 					S_angle += 1;
 				}
 				
                 handle2( S_angle );
+			*/	
+				handle( 3 );
                 motor( 100 ,100 );
                 break;
 				
@@ -218,13 +223,14 @@ void main( void )
                 /* 微妙に左寄り→右へ微曲げ */
                 //handle2( 8 * HANDLE_STEP + S_angle);
 				
-				if(S_angle_cnt > 1){
+			/*	if(S_angle_cnt > 5){
 					S_angle_cnt = 0;
 					S_angle += 1;
 				}
 				
                 handle2( S_angle );
-				
+			*/	
+				handle( 5 );
                 motor( 100 ,98 );
                 break;
 
@@ -239,7 +245,7 @@ void main( void )
                 /* 少し左寄り→右へ小曲げ */
                 handle( 20 );
                 motor( 90 ,30 );
-				
+				pattern = 12;
                 break;
 
             case 0x03://000 0 011
@@ -251,12 +257,14 @@ void main( void )
 			
 			case 0x38://001 1 000
                 /* 微妙に右寄り→左へ微曲げ */
-				if(S_angle_cnt > 1){
+			/*	if(S_angle_cnt > 10){
 					S_angle_cnt = 0;
 					S_angle -= 1;
 				}
 				
                 handle2( S_angle );
+			*/	
+				handle( -3 );
                 motor( 100 ,100 );
                 break;
 				
@@ -264,12 +272,14 @@ void main( void )
                 /* 微妙に右寄り→左へ微曲げ */
                 //handle2( -5 * HANDLE_STEP + S_angle);
 				
-				if(S_angle_cnt > 1){
+			/*	if(S_angle_cnt > 5){
 					S_angle_cnt = 0;
 					S_angle -= 1;
 				}
 				
                 handle2( S_angle );
+		*/		
+				handle( -5 );
                 motor( 98 ,100 );
                 break;
 
@@ -283,6 +293,7 @@ void main( void )
                 /* 少し右寄り→左へ小曲げ */
 				handle( -20 );
                 motor( 30 ,90 );
+				pattern = 13;
                 break;
 
             case 0xc0://110 0 000
@@ -312,36 +323,36 @@ void main( void )
 		
 		if(S_cnt > 1000){	//一定時間直線が続いた後のカーブ　＝　ブレーキ
 		
-			handle( 25 );
-        	motor( -40 ,-40 );
+			handle( 30 );
+        	motor( -50 ,-50 );
 			
-			if(LR_cnt > 200){ //ブレーキ終了時間
+			if(LR_cnt > 400){ //ブレーキ終了時間
 				S_cnt = 0;	
 			}
 		}else if(S_cnt > 500){	//一定時間直線が続いた後のカーブ　＝　ブレーキ
 		
-			handle( 25 );
+			handle( 30 );
         	motor( -20 ,-20 );
 			
-			if(LR_cnt > 200){ //ブレーキ終了時間
+			if(LR_cnt > 300){ //ブレーキ終了時間
 				S_cnt = 0;	
 			}
 		}else if(sensor_inp(MASK4_4)&0x18 != 0x00 ){ //xxx 1 xxx 外寄りすぎ
 		
 			handle( 30 );
-       		motor( 90 ,-10 );
+       		motor( 80 ,-20 );
 			
 			S_cnt = 0;
 		}else if(LR_cnt < 500 || sensor_inp(MASK4_4)&0x20 != 0x00){ //カーブ前半 || xx1 x xxx
 		
-			handle( 25 );
-       		motor( 90 ,10 );
+			handle( 30 );
+       		motor( 80 ,15 );
 			
 			S_cnt = 0;
 		
 		}else{//カーブ後半
 		
-			handle( 25 );
+			handle( 30 );
         	motor( 100 ,90 );
 			
 			S_cnt = 0;
@@ -378,36 +389,36 @@ void main( void )
 		
 		if(S_cnt > 1000){	//一定時間直線が続いた後のカーブ　＝　ブレーキ
 		
-			handle( -25 );
-        	motor( -40 ,-40 );
+			handle( -30 );
+        	motor( -50 ,-50 );
 			
-			if(LR_cnt > 200){ //ブレーキ終了時間
+			if(LR_cnt > 400){ //ブレーキ終了時間
 				S_cnt = 0;	
 			}
 		}else if(S_cnt > 500){	//一定時間直線が続いた後のカーブ　＝　ブレーキ
 		
-			handle( -25 );
+			handle( -30 );
         	motor( -20 ,-20 );
 			
-			if(LR_cnt > 200){ //ブレーキ終了時間
+			if(LR_cnt > 300){ //ブレーキ終了時間
 				S_cnt = 0;	
 			}
 		}else if(sensor_inp(MASK4_4)&0x18 != 0x00 ){ //xxx 1 xxx 外寄りすぎ
 		
 			handle( -30 );
-       		motor( -10 ,90 );
+       		motor( -20 ,90 );
 			
 			S_cnt = 0;
 		}else if(LR_cnt < 500 || sensor_inp(MASK4_4)&0x04 != 0x00 ){ //カーブ前半 || xxx x 1xx
 		
-			handle( -25 );
-       		motor( 10 ,90 );
+			handle( -30 );
+       		motor( 15 ,80 );
 			
 			S_cnt = 0;
 		
 		}else{//カーブ後半
 		
-			handle( -25 );
+			handle( -30 );
         	motor( 90 ,100 );
 			
 			S_cnt = 0;
@@ -606,8 +617,8 @@ void main( void )
     case 53:
         /* 右ハーフライン後のトレース、レーンチェンジ */
         if( sensor_inp(MASK4_4) == 0x00 ) {
-            handle( 15 );
-            motor( 70 ,50 );
+            handle( 30 );
+            motor( 70 ,30 );
             pattern = 54;
             cnt1 = 0;
             break;
@@ -688,8 +699,8 @@ void main( void )
     case 63:
         /* 左ハーフライン後のトレース、レーンチェンジ */
         if( sensor_inp(MASK4_4) == 0x00 ) {
-            handle( -15 );
-            motor( 50 ,70 );
+            handle( -30 );
+            motor( 30 ,70 );
             pattern = 64;
             cnt1 = 0;
             break;
@@ -914,8 +925,8 @@ int check_crossline( void )
 
     ret = 0;
     b = sensor_inp(MASK4_4);
-	//111 1 111   //011 1 111  //111 1 110  //011 1 110
-    if( b==0xff || b==0x7f || b==0xfe || b==0x7e) {
+	//111 1 111     //011 1 110
+    if( b==0xff  || b==0x7e) {
         ret = 1;
     }
     return ret;
@@ -932,8 +943,8 @@ int check_rightline( void )
 
     ret = 0;
     b = sensor_inp(MASK4_4);
-	//000 1 111  //000 1 110
-    if( b==0x1f || b==0x1e  ) {
+	//000 1 111  //000 1 110 
+    if( b==0x1f || b==0x1e   ) {
         ret = 1;
     }
     return ret;
@@ -950,7 +961,7 @@ int check_leftline( void )
 
     ret = 0;
     b = sensor_inp(MASK4_4);
-	//111 1 000   //011 1 000
+	//111 1 000   //011 1 000 
     if( b==0xf8 ||  b==0x78  ) {
         ret = 1;
     }
