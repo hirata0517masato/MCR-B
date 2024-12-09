@@ -35,7 +35,7 @@
 
 #define SERVO_PWM_CYCLE     16			   /* サーボモータPWMの周期     PWM_CYCLE * SERVO_PWM_CYCLE (ms)         */
 
-#define SERVO_CENTER   16680 //8340// 33360 //4170            /* サーボのセンタ値             */
+#define SERVO_CENTER   16610 //8340// 33360 //4170            /* サーボのセンタ値             */
 
 #define HANDLE_STEP     22              /* 1゜分の値                    */
 

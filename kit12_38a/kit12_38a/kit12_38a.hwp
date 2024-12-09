@@ -129,6 +129,7 @@
 "Object file" "Renesas OptLinker" "Renesas M16C Assembler" 
 "Object file" "Renesas OptLinker" "Renesas M16C C/C++ Compiler" 
 [PROJECT_FILES]
+"C:\WorkSpace\common_r8c38a\printf_lib.c" "User" "C source file" 2 
 "C:\WorkSpace\kit12_38a\kit12_38a\kit12_38a.c" "User" "C source file" 2 
 "C:\WorkSpace\kit12_38a\kit12_38a\startup.c" "User" "C source file" 2 
 [FOLDER]
@@ -143,25 +144,26 @@
 [OPTIONS_Debug_Renesas M16C Assembler]
 "Assembly source file" "03d211eea894dc10" 4 
 [OPTIONS_Debug_Renesas M16C C/C++ Compiler]
-"C source file" "0ede7fc2b894dc10" 3 
-"C++ source file" "0ede7fc2b894dc10" 2 
-"C:\WorkSpace\kit12_38a\kit12_38a\kit12_38a.c" "0ab61375f894dc10" 3 
-"C:\WorkSpace\kit12_38a\kit12_38a\startup.c" "0ab61375f894dc10" 3 
+"C source file" "0ede7fc2b894dc10" 2 
+"C++ source file" "0ede7fc2b894dc10" 3 
+"C:\WorkSpace\common_r8c38a\printf_lib.c" "01b9f33045a4bd10" 2 
+"C:\WorkSpace\kit12_38a\kit12_38a\kit12_38a.c" "0ab61375f894dc10" 2 
+"C:\WorkSpace\kit12_38a\kit12_38a\startup.c" "0ab61375f894dc10" 2 
 [OPTIONS_Debug_Renesas M16C C/C++ Library Generator]
 "Single Shot" "03d211eea894dc10" 1 
 [OPTIONS_Debug_Renesas M16C Configurator]
-"Single Shot" "0ab61375f894dc10" 6 
+"Single Shot" "01b9f33045a4bd10" 6 
 [OPTIONS_Debug_Renesas M16C ConfiguratorR8C]
-"Single Shot" "0ab61375f894dc10" 6 
+"Single Shot" "01b9f33045a4bd10" 6 
 [OPTIONS_Debug_Renesas OptLinker]
-"Single Shot" "0acd3375f894dc10" 5 
+"Single Shot" "03c3743045a4bd10" 5 
 [OPTIONS_Debug]
 "" 0 
 "[V|VERSION|1] [B|COMMAND|1] [S|SPEC|UITRON4] " 6 
 "[V|VERSION|1] [S|INCLUDE|^"..\..\..\common_r8c38a^"] [S|LANG|CPP] [S|OUTPUT|OBJECTCODE] [B|INSPECTOR|1] [S|OUTPUTPATH|^"$(CONFIGDIR)\$(FILELEAF).obj^"] [S|MISRA|ALL] [B|SILENT|1] [S|CPU|R8C2X]
-" 2 
-"[V|VERSION|1] [S|INCLUDE|^"..\..\..\common_r8c38a^"] [S|LANG|C] [S|OUTPUT|OBJECTCODE] [B|INSPECTOR|1] [S|OUTPUTPATH|^"$(CONFIGDIR)\$(FILELEAF).obj^"] [S|MISRA|ALL] [B|SILENT|1] [S|CPU|R8C2X]
 " 3 
+"[V|VERSION|1] [S|INCLUDE|^"..\..\..\common_r8c38a^"] [S|LANG|C] [S|OUTPUT|OBJECTCODE] [B|INSPECTOR|1] [S|OUTPUTPATH|^"$(CONFIGDIR)\$(FILELEAF).obj^"] [S|MISRA|ALL] [B|SILENT|1] [S|CPU|R8C2X]
+" 2 
 "[V|VERSION|1] [S|LIST|LM] [B|INSPECTOR|1] [S|OUTPUTPATH|^"$(CONFIGDIR)\$(FILELEAF).obj^"] [B|DISABLES_MESSAGE|1] [S|CPU|R8C2X] " 4 
 "[V|VERSION|1] [S|OUTPUTPATH|^"$(CONFIGDIR)\$(PROJECTNAME).lib^"] [S|CPU|R8C2X] [S|MODE|BUILD/CHANGED]" 1 
 "[V|VERSION|6] [B|OPTIMIZE|0] [B|DEBUG|1] [S|OUTPUT|^"$(CONFIGDIR)\$(PROJECTNAME).mot^"] [B|LIST|1] [S|LIST|^"$(CONFIGDIR)\$(PROJECTNAME).map^"] [S|OTHER|^"-change_message=information=1100,1322,1410^"] [S|FORM|STYPE] [B|TOTAL_SIZE|1] [B|STACK|1] [S|START|data_SE,bss_SE,data_SO,bss_SO,data_NE,bss_NE,data_NO,bss_NO,stack,istack,heap_NE(400)|interrupt,rom_NE,rom_NO,data_SEI,data_SOI,data_NEI,data_NOI,switch_table,C$VTBL,program(4000)|vector(fed8)|rom_FE,rom_FO(10000)] " 5 

@@ -1,4 +1,4 @@
-Optimizing Linkage Editor (V.10.01.00.000)        08-Dec-2024 20:34:13
+Optimizing Linkage Editor (V.10.01.00.000)        09-Dec-2024 19:28:03
 
 *** Options ***
 
@@ -12,6 +12,7 @@ Optimizing Linkage Editor (V.10.01.00.000)        08-Dec-2024 20:34:13
 -stack
 -total_size
 -input="C:\WorkSpace\kit12_38a\kit12_38a\Debug\kit12_38a.obj"
+-input="C:\WorkSpace\kit12_38a\kit12_38a\Debug\printf_lib.obj"
 -input="C:\WorkSpace\kit12_38a\kit12_38a\Debug\startup.obj"
 -library="C:\WorkSpace\kit12_38a\kit12_38a\Debug\kit12_38a.lib"
 -output="C:\WorkSpace\kit12_38a\kit12_38a\Debug\kit12_38a.abs"
@@ -33,19 +34,19 @@ data_SO
 bss_SO
                                   00000400  00000400         0   1
 data_NE
-                                  00000400  0000042b        2c   2
+                                  00000400  00000435        36   2
 bss_NE
-                                  0000042c  0000053d       112   2
+                                  00000436  000005e3       1ae   2
 data_NO
-                                  0000053e  0000053e         1   1
+                                  000005e4  000005e4         1   1
 bss_NO
-                                  0000053f  0000053f         0   1
+                                  000005e5  000005e5         0   1
 stack
-                                  0000053f  0000073e       200   1
+                                  000005e5  000007e4       200   1
 istack
-                                  0000073f  0000083e       100   1
+                                  000007e5  000008e4       100   1
 heap_NE
-                                  00000840  00000840         0   2
+                                  000008e6  000008e6         0   2
 interrupt
                                   00004000  00004000         0   2
 data_SEI
@@ -53,11 +54,11 @@ data_SEI
 data_SOI
                                   00004000  00004000         0   1
 data_NEI
-                                  00004000  0000402b        2c   2
+                                  00004000  00004035        36   2
 data_NOI
-                                  0000402c  0000402c         1   1
+                                  00004036  00004036         1   1
 program
-                                  0000402e  0000586c      183f   2
+                                  00004038  00005aea      1ab3   2
 vector
                                   0000fed8  0000ffd7       100   2
 fvector

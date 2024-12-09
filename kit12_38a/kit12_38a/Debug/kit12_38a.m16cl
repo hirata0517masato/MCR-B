@@ -7,6 +7,7 @@
 -stack
 -total_size
 -input="C:\WorkSpace\kit12_38a\kit12_38a\Debug\kit12_38a.obj"
+-input="C:\WorkSpace\kit12_38a\kit12_38a\Debug\printf_lib.obj"
 -input="C:\WorkSpace\kit12_38a\kit12_38a\Debug\startup.obj"
 -library="C:\WorkSpace\kit12_38a\kit12_38a\Debug\kit12_38a.lib"
 -output="C:\WorkSpace\kit12_38a\kit12_38a\Debug\kit12_38a.abs"

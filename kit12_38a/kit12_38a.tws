@@ -14,5 +14,7 @@
 "C:\WorkSpace\kit12_38a\sioservo1_38a\sioservo1_38a.c" 104 104 1103 380 0 0 
 [LOADED_PROJECTS]
 "kit12_38a" 
+"kit12test_38a" 
 "sioservo1_38a" 
+"sioservo2_38a" 
 [END]

@@ -150,11 +150,11 @@
 [OPTIONS_Debug_Renesas M16C C/C++ Library Generator]
 "Single Shot" "03d211eea894dc10" 1 
 [OPTIONS_Debug_Renesas M16C Configurator]
-"Single Shot" "02b74667f894dc10" 6 
+"Single Shot" "090dfd133a94bd10" 6 
 [OPTIONS_Debug_Renesas M16C ConfiguratorR8C]
-"Single Shot" "02b74667f894dc10" 6 
+"Single Shot" "090dfd133a94bd10" 6 
 [OPTIONS_Debug_Renesas OptLinker]
-"Single Shot" "02b74667f894dc10" 5 
+"Single Shot" "0de45e133a94bd10" 5 
 [OPTIONS_Debug]
 "" 0 
 "[V|VERSION|1] [B|COMMAND|1] [S|SPEC|UITRON4] " 6 
