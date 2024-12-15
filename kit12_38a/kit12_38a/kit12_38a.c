@@ -26,9 +26,9 @@
 
 /* 定数設定 */
 #define PWM_CYCLE       	9999           /* 駆動モータPWMの周期       1ms       								*/
-#define SERVO_PWM_CYCLE     16			   /* サーボモータPWMの周期     PWM_CYCLE * SERVO_PWM_CYCLE (ms)         */
-#define HANDLE_STEP     22              /* 1゜分の値                    */
-#define SERVO_CENTER    	16610          /* サーボのセンタ値             */
+#define SERVO_PWM_CYCLE     10//16			   /* サーボモータPWMの周期     PWM_CYCLE * SERVO_PWM_CYCLE (ms)         */
+#define HANDLE_STEP     	14//22              /* 1゜分の値                    */
+#define SERVO_CENTER    	16730          /* サーボのセンタ値             */
 
 
 #define RUN_TIME	11000	//走行時間

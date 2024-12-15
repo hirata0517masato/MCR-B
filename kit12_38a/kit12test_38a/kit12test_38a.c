@@ -47,11 +47,11 @@ bit3 2 1 0
 //#define SERVO_CENTER    4170 //3750           /* サーボのセンタ値             */
 
 #define PWM_CYCLE       	9999           /* 駆動モータPWMの周期       1ms       								*/
-#define SERVO_PWM_CYCLE     16			   /* サーボモータPWMの周期     PWM_CYCLE * SERVO_PWM_CYCLE (ms)         */
-#define HANDLE_STEP     22              /* 1゜分の値                    */
+#define SERVO_PWM_CYCLE     10//16			   /* サーボモータPWMの周期     PWM_CYCLE * SERVO_PWM_CYCLE (ms)         */
+#define HANDLE_STEP     14//22              /* 1゜分の値                    */
 
 
-#define SERVO_CENTER    	16680          /* サーボのセンタ値             */
+#define SERVO_CENTER    	16730          /* サーボのセンタ値             */
 
 
 /*======================================*/

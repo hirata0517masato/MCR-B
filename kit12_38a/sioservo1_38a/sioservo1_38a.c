@@ -33,11 +33,11 @@
 /* 定数設定 */
 #define PWM_CYCLE      9999// 4999//19999 //2499           /* モータPWMの周期   初期値39999  2499 */
 
-#define SERVO_PWM_CYCLE     16			   /* サーボモータPWMの周期     PWM_CYCLE * SERVO_PWM_CYCLE (ms)         */
+#define SERVO_PWM_CYCLE     10			   /* サーボモータPWMの周期     PWM_CYCLE * SERVO_PWM_CYCLE (ms)         */
 
-#define SERVO_CENTER   16610 //8340// 33360 //4170            /* サーボのセンタ値             */
+#define SERVO_CENTER   16730 //8340// 33360 //4170            /* サーボのセンタ値             */
 
-#define HANDLE_STEP     22              /* 1゜分の値                    */
+//#define HANDLE_STEP     22              /* 1゜分の値                    */
 
 /*======================================*/
 /* プロトタイプ宣言                     */
