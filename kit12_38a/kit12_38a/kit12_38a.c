@@ -31,7 +31,9 @@
 #define SERVO_CENTER    	16760          /* サーボのセンタ値             */
 
 
-#define RUN_TIME	38000	//走行時間
+#define RUN_TIME	24000	//走行時間
+
+//#define WallOn //レーンチェンジの壁があるときに有効化すること
 
 
 
@@ -61,7 +63,6 @@ unsigned char startbar_get( void );
 void led_out( unsigned char led );
 void motor( int accele_l, int accele_r );
 void handle( int angle );
-void handle2( int angle );
 
 
 /*======================================*/
@@ -72,14 +73,23 @@ unsigned long   cnt1;                   /* main内で使用                 */
 unsigned long   run_time = 0;
 int             pattern;                /* パターン番号                 */
 
-int S_angle = 0;
 int angle_buf = 0;
 
-unsigned char sensor_old = 0;
-unsigned long S_angle_cnt = 0;
 unsigned long S_cnt = 0,LR_cnt = 0;
 
+int s_motor = 0; //直線用モータ出力
+
 unsigned long OUT_cnt = 0;
+
+unsigned char out_flag = 0; //コースアウトした場合は１
+
+
+#define LOG_MAX 4025
+signed char log[LOG_MAX] = {};
+int log_num = 0;
+int log_start = 0;
+signed char log_buf_Lmotor,log_buf_Rmotor;
+signed char log_buf_handle;
 
 
 /************************************************************************/
@@ -119,8 +129,9 @@ void main( void )
 			OUT_cnt = 0;
 			Out_cnt++;
 			
-			if(Out_cnt > 1000){// 1000msクランク判定が続いたらコースアウト
+			if(Out_cnt > 500){// 500msクランク判定が続いたらコースアウト
 				pattern = 99;
+				out_flag = 1; //コースアウト
 				cnt1 = 0;
 			}
 		}
@@ -182,7 +193,7 @@ void main( void )
             pattern = 11;
             run_time = 0;
             cnt1 = 0;
-            S_angle = 0;
+			log_start = 1;  //ログ取得開始
             break;
         }
         if( cnt1 < 50 ) {              /* LED点滅処理                   */
@@ -211,130 +222,134 @@ void main( void )
             break;
         }
 
-		LR_cnt = 0;
+		
+		if(S_cnt > 1000){//指定時間以上直線が続いたら減速する（エンコーダでの速度制御風） T600x5 で500くらい
+			s_motor = 90;
+		}else{
+			s_motor = 100;
+		}
 		
         switch( sensor_inp(MASK4_4) ) {
             case 0x18: //0001 1000
                 /* センタ→まっすぐ */
-                //handle2( S_angle );
 				
 				handle( 0 );
-                motor( 100 ,100 );
+                motor( s_motor ,s_motor );
                 break;
-			///////////////////////////////////////////////////////////
+			///////////////////////////////////////////////////////////右曲げ
 			
 			case 0x08://0000 1000
-                /* 微妙に左寄り→右へ微曲げ */
-		
 				handle( 10 );
-                motor( 100 ,100 );
+                motor( s_motor ,s_motor );
                 break;
 			
 			case 0x0c://0000 1100
-                /* 微妙に左寄り→右へ微曲げ */
-		
 				handle( 15 );
-                motor( 100 ,100 );
+                motor( s_motor ,s_motor );
                 break;
 				
 				
             case 0x04://0000 0100
-                /* 微妙に左寄り→右へ微曲げ */
-      
-				handle( 65 );
-                motor( 100 ,100 );
+                handle( 65 );
+                motor( s_motor ,s_motor );
                 break;
 
             case 0x06://0000 0110
-                /* 少し左寄り→右へ小曲げ */
                 handle( 95 );
-                motor( 100 ,100 );
+                motor( s_motor ,s_motor );
 				
+				pattern = 12;
+				LR_cnt = 0;
                 break;
 				
 			case 0x02://0000 0010
-                /* 少し左寄り→右へ小曲げ */
                 handle( 115 );
-                motor( 100 ,100 );
+                motor( s_motor ,s_motor );
 				
+				pattern = 12;
+				LR_cnt = 0;
                 break;
 				
 			case 0x07://0000 0111
-                /* 少し左寄り→右へ小曲げ */
                 handle( 120 );
-                motor( 100 ,95 );
+                motor( s_motor ,s_motor -5 );
+				
 				pattern = 12;
+				LR_cnt = 0;
                 break;
 
             case 0x03://0000 0011
-                /* 大きく左寄り→右へ大曲げ */
-				handle( 120 );
-                motor( 100 ,95 );
+                handle( 120 );
+                motor( s_motor ,s_motor -5 );
+				
                 pattern = 12;
+				LR_cnt = 0;
                 break;
 			
 			case 0x83://1000 0011
-                /* 大きく左寄り→右へ大曲げ */
-				handle( 120 );
-                motor( 100 ,95 );
+                handle( 120 );
+                motor( s_motor ,s_motor -5);
+				
                 pattern = 12;
+				LR_cnt = 0;
                 break;
 
-			///////////////////////////////////////////////////////
+			///////////////////////////////////////////////////////左曲げ
 			
 			case 0x10://0001 0000
-                /* 微妙に右寄り→左へ微曲げ */
-			
-				handle( -10 );
-                motor( 100 ,100 );
+                handle( -10 );
+                motor( s_motor ,s_motor );
                 break;
 			
 			case 0x30://0011 0000
-                /* 微妙に右寄り→左へ微曲げ */
-			
-				handle( -15 );
-                motor( 100 ,100 );
+                handle( -15 );
+                motor( s_motor ,s_motor );
                 break;
 				
             case 0x20://0010 0000
-                /* 微妙に右寄り→左へ微曲げ */
-      		
-				handle( -65 );
-                motor( 100 ,100 );
+                handle( -65 );
+                motor( s_motor ,s_motor );
                 break;
 
             case 0x60://0110 0000
-                /* 少し右寄り→左へ小曲げ */
-				handle( -95 );
-                motor( 100 ,100 );
+                handle( -95 );
+                motor( s_motor ,s_motor );
+				
+				pattern = 13;
+				LR_cnt = 0;
                 break;
 			
 			 case 0x40://0100 0000
-                /* 少し右寄り→左へ小曲げ */
-				handle( -115 );
-                motor( 100 ,100 );
+                handle( -115 );
+               	motor( s_motor ,s_motor );
+				
+				pattern = 13;
+				LR_cnt = 0;
                 break;
 			
 			
 			 case 0xe0://1110 0000
-                /* 少し右寄り→左へ小曲げ */
-				handle( -120 );
-                motor( 95 ,100 );
+                handle( -120 );
+                motor( s_motor -5 ,s_motor );
+				
 				pattern = 13;
+				LR_cnt = 0;
                 break;
 
             case 0xc0://1100 0000
-                /* 大きく右寄り→左へ大曲げ */
-				handle( -120 );
-                motor( 95 ,100 );
+                handle( -120 );
+                motor( s_motor -5 ,s_motor );
+				
                 pattern = 13;
+				LR_cnt = 0;
                 break;
 				
 			case 0xc1://1100 0001
-                /* 大きく右寄り→左へ大曲げ */
-				handle( -120 );
-                motor( 95 ,100 );
+                handle( -120 );
+                motor( s_motor -5 ,s_motor );
+				
                 pattern = 13;
+				LR_cnt = 0;
                 break;
 				
             default:
@@ -345,6 +360,7 @@ void main( void )
     case 12://右大曲
 		
 		led_out( 3 );
+		
 		
         if( check_crossline() ) {       // 大曲げ中もクロスラインチェック 
             pattern = 21;
@@ -361,33 +377,35 @@ void main( void )
         }
 		
 		
-		if((sensor_inp(MASK4_4)&0x20) != 0x00 ){ //xx1x xxxx 外寄りすぎ
+		if(LR_cnt < 20){
+			handle( 100 );
+       		motor( 100 ,-100 );
+			
+		}else if((sensor_inp(MASK4_4)&0x20) != 0x00 ){ //xx1x xxxx 外寄りすぎ
 		//if((sensor_inp(MASK4_4)&0x10) != 0x00 ){ //xxx1 xxxx 外寄りすぎ
 			led_out( 1 );
 			
 			handle( 120 );
        		motor( 100 ,-100 );
 		
-			//LR_cnt = 0;
 			
 		}else if((sensor_inp(MASK4_4)&0x40) != 0x00 ){ //x1xx xxxx 外寄りすぎ
 		//}else if((sensor_inp(MASK4_4)&0x20) != 0x00 ){ //xx1x xxxx 外寄りすぎ
 		
 			led_out( 1 );
 			
-			if(LR_cnt < 1000){
+			if(LR_cnt < 500){
 				handle( 120 );
-       			motor( 100 ,-100 );
+       			motor( 100 ,30 );
 				
-			}else if(LR_cnt < 1500){
+			}else if(LR_cnt < 1000){
 				handle( 110 );
-       			motor( 100 , 30 );
+       			motor( 100 , 70 );
 					
 			}else{
 				handle( 110 );
-       			motor( 100 , 50 );
+       			motor( 100 , 80 );
 			}
-			//LR_cnt = 0;
 			
 		}else if((sensor_inp(MASK4_4)&0x80) != 0x00 ){ //1xxx xxxx 外寄りすぎ
 		//}else if((sensor_inp(MASK4_4)&0x40) != 0x00 ){ //x1xx xxxx 外寄りすぎ
@@ -396,72 +414,35 @@ void main( void )
 			
 			if(LR_cnt < 500){
 				handle( 110 );
-       			motor( 100 ,70 );
+       			motor( 100 ,90 );
 				
 			}else if(LR_cnt < 1000){
 				handle( 110 );
-       			motor( 100 ,80 );
+       			motor( 100 ,95 );
 				
 			}else{
 				handle( 110 );
-       			motor( 100 ,90 );
+       			motor( 100 ,100 );
 			}
 			
-			//LR_cnt = 0;
-/*			
-		}else if(S_cnt > 1500){	//一定時間直線が続いた後のカーブ　＝　ブレーキ
-		
-			handle( 35 );
-        	motor( -100 ,-100 );
-			
-			if(LR_cnt > 250){ //ブレーキ終了時間
-				S_cnt = 0;	
-			}
-		}else if(S_cnt > 1200){	//一定時間直線が続いた後のカーブ　＝　ブレーキ
-		
-			handle( 35 );
-        	motor( -80 ,-80 );
-			
-			if(LR_cnt > 250){ //ブレーキ終了時間
-				S_cnt = 0;	
-			}
-		}else if(S_cnt > 1000){	//一定時間直線が続いた後のカーブ　＝　ブレーキ
-		
-			handle( 35 );
-        	motor( -60 ,-60 );
-			
-			if(LR_cnt > 150){ //ブレーキ終了時間
-				S_cnt = 0;	
-			}
-		}else if(S_cnt > 500){	//一定時間直線が続いた後のカーブ　＝　ブレーキ
-		
-			handle( 35 );
-        	motor( -40 ,-40 );
-			
-			if(LR_cnt > 150){ //ブレーキ終了時間
-				S_cnt = 0;	
-			}
-*/	
+
 		}else if(LR_cnt < 400 ){ //カーブ前半 
 		
 			handle( 110 );
-       		motor( 100 ,90 );
+       		motor( 100 ,100 );
 			
-			S_cnt = 0;
 		
 		}else if(LR_cnt < 800 ){ //カーブ中間
 		
 			handle( 110 );
-        	motor( 100 ,95 );
+        	motor( 100 ,100 );
 			
-			S_cnt = 0;
 		
 		}else{//カーブ後半
 		
 			handle( 110 );
         	motor( 100 ,100 );
 			
-			S_cnt = 0;
 		}
 		
 				
@@ -469,24 +450,20 @@ void main( void )
         if( sensor_inp(MASK4_4) == 0x0c || sensor_inp(MASK4_4) == 0x04 ) {//0000 1100  //0000 0100
 		//if( (sensor_inp(MASK4_4) == 0x0c )) {//0000 1100
 			
-		//	if(sensor_old & 0x01 == 0x01  ||  sensor_old & 0x18 == 0x00){
+
 				pattern = 11;
-				//pattern = 14;
+			
 				S_cnt = 0;
-		/*		
-			}else{//外側に膨らんでる
-				S_cnt = 9000;//ブレーキするため
-				LR_cnt = 0;
-			}
-		*/
+	
         }
-		sensor_old = sensor_inp(MASK4_4);
+
         break;
 
     case 13: //左大曲
 	
 		led_out( 3 );
 	
+		
         if( check_crossline() ) {       // 大曲げ中もクロスラインチェック 
             pattern = 21;
             break;
@@ -501,7 +478,12 @@ void main( void )
             break;
         }
 	   		
-		if((sensor_inp(MASK4_4)&0x04) != 0x00 ){ //xxxx x1xx 外寄りすぎ
+		if(LR_cnt < 20){
+			
+			handle( -100 );
+       		motor( -100 ,100 );
+			
+		}else if((sensor_inp(MASK4_4)&0x04) != 0x00 ){ //xxxx x1xx 外寄りすぎ
 		//if((sensor_inp(MASK4_4)&0x08) != 0x00 ){ //xxxx 1xxx 外寄りすぎ
 		
 			led_out( 1 );
@@ -514,21 +496,19 @@ void main( void )
 		
 			led_out( 1 );
 			
-			if(LR_cnt < 1000){
+			if(LR_cnt < 500){
 				handle( -120 );
-       			motor( -100 ,100 );
-				
-			}else if(LR_cnt < 1500){
-				handle( -110 );
        			motor( 30 ,100 );
+				
+			}else if(LR_cnt < 1000){
+				handle( -110 );
+       			motor( 70 ,100 );
 					
 			}else{
 				handle( -110 );
-       			motor( 50 ,100 );
+       			motor( 80 ,100 );
 			}
 			
-			
-		//	LR_cnt = 0;
 		}else if((sensor_inp(MASK4_4)&0x01) != 0x00 ){ //xxxx xxx1 外寄りすぎ
 		//}else if((sensor_inp(MASK4_4)&0x02) != 0x00 ){ //xxxx xx1x 外寄りすぎ
 		
@@ -536,73 +516,34 @@ void main( void )
 			
 			if(LR_cnt < 500){
 				handle( -110 );
-       			motor( 70 ,100 );
+       			motor( 90 ,100 );
 				
 			}else if(LR_cnt < 1000){
 				handle( -110 );
-       			motor( 80 ,100 );
+       			motor( 95 ,100 );
 					
 			}else{
 				handle( -110 );
-       			motor( 90 ,100 );
+       			motor( 100 ,100 );
 			}
-			
-		//	LR_cnt = 0;
-		
-/*			
-		}else if(S_cnt > 1500){	//一定時間直線が続いた後のカーブ　＝　ブレーキ
-		
-			handle( -35 );
-        	motor( -100 ,-100 );
-			
-			if(LR_cnt > 250){ //ブレーキ終了時間
-				S_cnt = 0;	
-			}
-		}else if(S_cnt > 1200){	//一定時間直線が続いた後のカーブ　＝　ブレーキ
-		
-			handle( -35 );
-        	motor( -80 ,-80 );
-			
-			if(LR_cnt > 250){ //ブレーキ終了時間
-				S_cnt = 0;	
-			}
-		}else if(S_cnt > 1000){	//一定時間直線が続いた後のカーブ　＝　ブレーキ
-		
-			handle( -35 );
-        	motor( -60 ,-60 );
-			
-			if(LR_cnt > 150){ //ブレーキ終了時間
-				S_cnt = 0;	
-			}
-		}else if(S_cnt > 500){	//一定時間直線が続いた後のカーブ　＝　ブレーキ
-		
-			handle( -35 );
-        	motor( -40 ,-40 );
-			
-			if(LR_cnt > 150){ //ブレーキ終了時間
-				S_cnt = 0;	
-			}
-*/		
+	
 		}else if(LR_cnt < 400 ){ //カーブ前半 
 		
 			handle( -110 );
-       		motor( 90 ,100 );
+       		motor( 100 ,100 );
 			
-			S_cnt = 0;
 		
 		}else if(LR_cnt < 800){ //カーブ中間
 		
 			handle( -110 );
-        	motor( 95 ,100 );
+        	motor( 100 ,100 );
 			
-			S_cnt = 0;
 			
 		}else{//カーブ後半
 		
 			handle( -110 );
         	motor( 100 ,100 );
 			
-			S_cnt = 0;
 		}
 		
 		
@@ -610,163 +551,15 @@ void main( void )
         if( (sensor_inp(MASK4_4) == 0x30) || (sensor_inp(MASK4_4) == 0x20) ) {//0011 0000  //0010 0000 
 		//if( (sensor_inp(MASK4_4) == 0x30) ) {//0011 0000  
 	//	if( (sensor_inp(MASK4_4) == 0x18) || (sensor_inp(MASK4_4) == 0x10) ) {//0001 1000  //001 0000  
-		//	if(sensor_old & 0x80 == 0x80  ||  sensor_old & 0x18 == 0x00){
+
 				pattern = 11;
-				//pattern = 15;
+			
 				S_cnt = 0;
-		/*		
-			}else{//外側に膨らんでる
-				S_cnt = 9000;//ブレーキするため
-				LR_cnt = 0;
-			}
-		*/			
+		
         }
-		sensor_old = sensor_inp(MASK4_4);
+
         break;
-/*
-	case 14:
-		
-        if( check_crossline() ) {       // 大曲げ中もクロスラインチェック 
-            pattern = 21;
-            break;
-        }
-        if( check_rightline() ) {       // 右ハーフラインチェック       
-            pattern = 51;
-            break;
-        }
-        if( check_leftline() ) {        // 左ハーフラインチェック       
-            pattern = 61;
-            break;
-        }
-		
-		 switch( sensor_inp(MASK4_4) ) {
-            case 0x18: //0001 1000
-				handle( 20 );
-                motor( 100 ,100 );
-                break;
-			///////////////////////////////////////////////////////////
-			
-			case 0x1C://0001 1100
-				handle( 20 );
-                motor( 100 ,100 );
-                break;
-				
-            case 0x04://0000 0100
-				handle( 20 );
-                motor( 100 ,100 );
-                break;
 
-            case 0x06://0000 0110
-                handle( 25 );
-                motor( 100 ,90 );
-				
-                break;
-			
-			case 0x07://0000 0111
-                handle( 25 );
-                motor( 100 ,90 );
-                break;
-
-            case 0x03://0000 0011
-				handle( 30 );
-                motor( 100 ,90 );
-                break;
-			
-			case 0x83://1000 0011
-				handle( 35 );
-                motor( 100 ,80 );
-                break;
-
-			case 0x81://1000 0001
-				handle( 35 );
-                motor( 100 ,80 );
-                break;
-				
-            default:
-                break;
-        }
-				
-		// 右へ大曲げの終わりのチェック 
-        if( sensor_inp(MASK4_4) == 0x60 || sensor_inp(MASK4_4) == 0x02) {//0110 0000  //0010 0000 
-			
-			pattern = 11;
-			S_cnt = 0;
-        }
-		sensor_old = sensor_inp(MASK4_4);
-        break;
-*/
-/*	
-	case 15:
-		
-        if( check_crossline() ) {       // 大曲げ中もクロスラインチェック 
-            pattern = 21;
-            break;
-        }
-        if( check_rightline() ) {       // 右ハーフラインチェック       
-            pattern = 51;
-            break;
-        }
-        if( check_leftline() ) {        // 左ハーフラインチェック       
-            pattern = 61;
-            break;
-        }
-		
-		 switch( sensor_inp(MASK4_4) ) {
-            case 0x18: //0001 1000
-				handle( -20 );
-                motor( 100 ,100 );
-                break;
-			///////////////////////////////////////////////////////////
-			
-			case 0x38://0011 1000
-				handle( -20 );
-                motor( 100 ,100 );
-                break;
-				
-            case 0x20://0010 0000
-				handle( -20 );
-                motor( 100 ,100 );
-                break;
-
-            case 0x60://0110 0000
-                handle( -25 );
-                motor( 90 ,100 );
-				
-                break;
-			
-			case 0xe0://1110 0000
-                handle( -25 );
-                motor( 90 ,100 );
-                break;
-
-            case 0xc0://1100 0000
-				handle( -30 );
-                motor( 90 ,100 );
-                break;
-			
-			case 0xc1://1100 0001
-				handle( -35 );
-                motor( 80 ,100 );
-                break;
-
-			case 0x81://1000 0001
-				handle( -35 );
-                motor( 80 ,100 );
-                break;
-				
-            default:
-                break;
-        }
-				
-		// 左へ大曲げの終わりのチェック 
-        if( sensor_inp(MASK4_4) == 0x06 || sensor_inp(MASK4_4) == 0x04) {//0000 0110  //0000 0100 
-			
-			pattern = 11;
-			S_cnt = 0;
-        }
-		sensor_old = sensor_inp(MASK4_4);
-        break;
-*/
     case 21:
         /* １本目のクロスライン検出時の処理 */
         led_out( 0x3 );
@@ -821,26 +614,25 @@ void main( void )
         }
 
         if(cnt1 > 120){
-			M = 70;
+			M = 80;
 		}else if(cnt1 > 160){
-			M = 70;
+			M = 80;
 		}else if(cnt1 > 150){
-			M = 70;
+			M = 80;
 		}else if(cnt1 > 130){
-			M = 70;
+			M = 80;
 		}else if(cnt1 > 100){
-			M = 60;
+			M = 70;
 		}else if(cnt1 > 80){
-			M = 50;
+			M = 60;
 		}else{
-			M = 40;
+			M = 50;
 		}
 		
 		switch( sensor_inp(MASK4_4) ) {
             case 0x18: //0001 1000
                 /* センタ→まっすぐ */
-                //handle2( S_angle );
-				
+
 				handle( 0 );
                 motor( M ,M );
                 break;
@@ -959,7 +751,7 @@ void main( void )
             cnt1 = 0;
         }
 		
-		sensor_old = sensor_inp(MASK4_4);
+	
         break;
         
 	case 32:
@@ -978,7 +770,7 @@ void main( void )
 			S_cnt = 0;
             cnt1 = 0;
         }
-		sensor_old = sensor_inp(MASK4_4);
+
         break;
 		
     case 41:
@@ -1008,7 +800,7 @@ void main( void )
             cnt1 = 0;
         }
 		
-		sensor_old = sensor_inp(MASK4_4);
+
         break;
 
     case 42:
@@ -1027,7 +819,7 @@ void main( void )
 			S_cnt = 0;
             cnt1 = 0;
         }
-		sensor_old = sensor_inp(MASK4_4);
+
         break;
 
 
@@ -1047,7 +839,7 @@ void main( void )
 
     case 52:
         /* ２本目を読み飛ばす */
-        if( cnt1 > 100 ) {
+        if( cnt1 > 30 ) {
             pattern = 53;
             cnt1 = 0;
         }
@@ -1062,18 +854,28 @@ void main( void )
     case 53:
         /* 右ハーフライン後のトレース、レーンチェンジ */
         if( sensor_inp(MASK4_4) == 0x00 ) {
-            handle( 90 );
+#ifdef WallOn
+            handle( 130 );
             motor( 100 ,0 );
+#else
+			handle( 130 );
+			motor( 100 ,0 );
+#endif
             pattern = 54;
             cnt1 = 0;
             break;
         }
-		
+
+#ifdef WallOn
 		M = 90;
+#else
+		M = 100;
+#endif
+		
+
         switch( sensor_inp(MASK4_4) ) {
             case 0x30: //0011 0000
                 /* センタ→まっすぐ */
-                //handle2( S_angle );
 				
 				handle( 0 );
                 motor( M ,M );
@@ -1163,12 +965,31 @@ void main( void )
         break;
 
     case 54:
+/*
+#ifdef WallOn
+ 
+#else
+			handle( 130 );
+			
+			if(cnt1 < 50){
+				motor( 100 ,-30 );
+			}else{
+            	motor( 100 ,100 );
+			}
+#endif
+*/
         /* 右レーンチェンジ終了のチェック */
         //if( sensor_inp( MASK4_4 ) == 0x01 || sensor_inp( MASK4_4 ) == 0x03 ) { //0000 0001  //0000 0011
-		if(cnt1 > 100 && sensor_inp( MASK4_4 )&0x01 != 0x00 ) { //xxxx xxx1
+		//if(cnt1 > 100 && sensor_inp( MASK4_4 )&0x01 != 0x00 ) { //xxxx xxx1
+		if(cnt1 > 100 && sensor_inp( MASK4_4 )&0x02 != 0x00 ) { //xxxx xx1x
+#ifdef WallOn
             handle( -100 );
-            motor( 30 ,100 );
-          
+            motor( 10 ,100 );
+#else
+            handle( -100 );
+            motor( 10 ,100 );
+#endif
+		     
             pattern = 55;
             cnt1 = 0;
         }
@@ -1177,11 +998,18 @@ void main( void )
     case 55:
         /* 右レーンチェンジ終了のチェック */
         //if( sensor_inp( MASK4_4 ) == 0x60 ) { //0110 0000
-		if(cnt1 > 100 && sensor_inp( MASK4_4 )&0x60 != 0x00 ) { //x11x xxxx
+		//if(cnt1 > 100 && sensor_inp( MASK4_4 )&0x60 != 0x00 ) { //x11x xxxx
+		if(cnt1 > 100 && sensor_inp( MASK4_4 )&0xc0 != 0x00 ) { //11xx xxxx
             led_out( 0x0 );
-			
+
+#ifdef WallOn
 			handle( -100 );
-            motor( 30 ,100 );
+            motor( 10 ,100 );
+#else
+			handle( -100 );
+            motor( 10 ,100 );
+#endif			
+
           
             pattern = 56;
 			S_cnt = 0;
@@ -1217,7 +1045,7 @@ void main( void )
 
     case 62:
         /* ２本目を読み飛ばす */
-        if( cnt1 > 100 ) {
+        if( cnt1 > 30 ) {
             pattern = 63;
             cnt1 = 0;
         }
@@ -1231,18 +1059,28 @@ void main( void )
     case 63:
         /* 左ハーフライン後のトレース、レーンチェンジ */
         if(cnt1 > 100 &&  sensor_inp(MASK4_4) == 0x00 ) {
+
+#ifdef WallOn
             handle( -80 );
             motor( 0 ,100 );
+#else
+            handle( -80 );
+			motor( 0 ,100 );
+#endif
+
             pattern = 64;
             cnt1 = 0;
             break;
         }
         
+#ifdef WallOn
 		M = 90;
+#else
+		M = 100;
+#endif
 		switch( sensor_inp(MASK4_4) ) {
             case 0x0c: //0000 1100
                 /* センタ→まっすぐ */
-                //handle2( S_angle );
 				
 				handle( 0 );
                 motor( M ,M );
@@ -1332,12 +1170,32 @@ void main( void )
         break;
 
 	case 64:
-        
+ 
+ /*
+#ifdef WallOn  
+ 
+#else    
+        handle( -80 );
+			 
+		if(cnt1 < 50){
+			motor( -30 ,100 );
+		}else{
+            motor( 100 ,100 );
+		}
+#endif
+*/			
         //if( sensor_inp( MASK4_4 ) == 0x80 || sensor_inp( MASK4_4 ) == 0xC0) { //1000 0000  //1100 0000
-		if(cnt1 > 100 &&  sensor_inp( MASK4_4 )&0x80 != 0x00) { //1xxx xxxx
+		//if(cnt1 > 100 &&  sensor_inp( MASK4_4 )&0x80 != 0x00) { //1xxx xxxx
+		if(cnt1 > 100 &&  sensor_inp( MASK4_4 )&0x40 != 0x00) { //x1xx xxxx
+
+#ifdef WallOn
 			handle( 130 );
-            motor( 100 ,-100 );
-       
+            motor( 100 ,-60 );
+#else
+			handle( 130 );
+            motor( 100 ,-60 );
+#endif
+	  
             pattern = 65;
             cnt1 = 0;
         }
@@ -1346,11 +1204,19 @@ void main( void )
     case 65:
         /* 左レーンチェンジ終了のチェック */
         //if( sensor_inp( MASK4_4 ) == 0x06 ) { //0000 0110
-		if(cnt1 > 100 &&  sensor_inp( MASK4_4 )&0x06 != 0x00) { //xxxx x11x
+		//if(cnt1 > 100 &&  sensor_inp( MASK4_4 )&0x06 != 0x00) { //xxxx x11x
+		if(cnt1 > 100 &&  sensor_inp( MASK4_4 )&0x03 != 0x00) { //xxxx xx11
             led_out( 0x0 );
-			
+
+#ifdef WallOn
 			handle( 130 );
-            motor( 100 ,-100 ); //メモ：左は切り返し遅いので-100とする
+            motor( 100 ,-60 ); //メモ：左は切り返し遅いので-100とする
+#else
+			handle( 130 );
+            motor( 100 ,-60 ); 
+#endif
+			
+
        
             pattern = 66;
 			S_cnt = 0;
@@ -1371,12 +1237,28 @@ void main( void )
 
 	case 99://走行終了
 		 motor( 0 ,0 );
+		 log_start = 0;//ログの保存終了
+		 
+		 if(pushsw_get()){//スイッチが押されるとログ出力モード
+			 
+			 log_num = 0;
+			 printf( "pattern ,sensor, handle ,  Lmotor , Rmotor\n");
+			 
+			 while(log_num < LOG_MAX){
+				printf( "%3d,0x%02x,%4d,%4d,%4d\n", log[log_num]
+													,(unsigned char)log[log_num+1]&0x00ff
+													,log[log_num+2]
+													,log[log_num+3],log[log_num+4] );
+				
+				if(log[log_num] == 0 && log[log_num+1] == 0)break;
+				log_num += 5;	 
+			 }
+		 }
 		 
 		 if(cnt1 < 10000){
 	        switch( sensor_inp(MASK4_4) ) {
 	            case 0x18: //0001 1000
 	                /* センタ→まっすぐ */
-	                //handle2( S_angle );
 				
 					handle( 0 );
 	               // if(cnt1 < 1000) motor( 100 ,100 );
@@ -1582,17 +1464,18 @@ void init( void )
 #pragma interrupt intTRB(vect=24)
 void intTRB( void )
 {
-    static int servo_cnt = 0,servo_angle = 0;
+    static int servo_cnt = 0,servo_angle = 0,cnt10ms = 0;
 
 	if(servo_cnt == 0){
 		servo_angle = angle_buf ;	
 	}
 	
-	if(servo_angle >= (PWM_CYCLE)) trdgrd1 = PWM_CYCLE+2;
+	if(out_flag == 1)trdgrd1 = 0; //コースアウトの場合はサーボ出力をオフにする
+	else if(servo_angle >= (PWM_CYCLE)) trdgrd1 = PWM_CYCLE+2;
 	else if(servo_angle > 0 )trdgrd1 = servo_angle;
-	else {
-		 trdgrd1 = 0;
-	}	
+	else trdgrd1 = 0;
+	
+		
 	servo_angle -=  PWM_CYCLE;
 	if(servo_angle <= 0)servo_angle = 0;
 	
@@ -1608,11 +1491,24 @@ void intTRB( void )
     cnt1++;
 	run_time++;
 	LR_cnt++;
-	S_angle_cnt++;
 	OUT_cnt++;
 	
-	if(pattern > 10 && run_time > 1000){
-		S_cnt++;
+	if(pattern > 10 && run_time > 800){//走行開始直後は0ms/sからのスタートなので XXXXmsはカウントしない
+		S_cnt++;//直線走行時間
+	}
+	
+	cnt10ms++;
+	if(cnt10ms >= 10){
+		cnt10ms = 0;
+		if(log_start == 1){
+			if(log_num + 5 < LOG_MAX){
+				log[log_num++] = pattern;
+				log[log_num++] = sensor_inp(MASK4_4)&0x00ff;
+				log[log_num++] = log_buf_handle;
+				log[log_num++] = log_buf_Lmotor;
+				log[log_num++] = log_buf_Rmotor;
+			}	
+		}
 	}
 
 }
@@ -1672,8 +1568,8 @@ int check_rightline( void )
 
     ret = 0;
     b = sensor_inp(MASK4_4);
-	//0000 1111   //0001 1111 //0001 1110 //0001 1101 //0001 1011 //0000 1101 //0000 1011 //0001 1001 //0001 0001
-    if( b==0x0f || b==0x1f  || b==0x1e   || b==0x1d  || b==0x1b  || b==0x0d  || b==0x0b  || b==0x19 || b==0x11) {
+	//0000 1111   //0001 1111 //0001 1110 //0001 1101 //0001 1011 //0000 1101 //0000 1011 //0001 1001 //0001 0001 //0000 1001 //0011 1111
+    if( b==0x0f || b==0x1f  || b==0x1e   || b==0x1d  || b==0x1b  || b==0x0d  || b==0x0b  || b==0x19  || b==0x11  || b==0x09  || b==0x3f) {
 		
 	//0000 1111   //0001 1111
     //if( b==0x0f || b==0x1f ) {
@@ -1693,8 +1589,8 @@ int check_leftline( void )
 
     ret = 0;
     b = sensor_inp(MASK4_4);
-	//1111 0000  //1111 1000 //0111 1000 //1011 1000  //1101 1000  //1011 0000  //1101 0000  //1001 1000 //1000 1000
-    if( b==0xf0  || b==0xf8  || b==0x78 || b==0xb8   || b==0xd8   || b==0xb0    || b==0xd0   || b==0x98 || b==0x88) {
+	//1111 0000  //1111 1000 //0111 1000 //1011 1000  //1101 1000  //1011 0000  //1101 0000  //1001 1000 //1000 1000  //1001 0000 //1111 1100
+    if( b==0xf0  || b==0xf8  || b==0x78 || b==0xb8   || b==0xd8   || b==0xb0    || b==0xd0   || b==0x98  || b==0x88   || b==0x90  || b==0xfc) {
 	
 	//1111 0000  //1111 1000 
     //if( b==0xf0  || b==0xf8 ) {
@@ -1773,6 +1669,9 @@ void motor( int accele_l, int accele_r )
     accele_l = accele_l * sw_data / 20;
     accele_r = accele_r * sw_data / 20;
 */
+	log_buf_Lmotor = accele_l;
+	log_buf_Rmotor = accele_r;
+	
     /* 左モータ制御 */
     if( accele_l >= 0 ) {
         p2 &= 0xfd;
@@ -1807,6 +1706,11 @@ void handle( int angle )
     /* サーボが左右逆に動く場合は、「-」を「+」に替えてください */
     //trdgrd1 = SERVO_CENTER - angle * HANDLE_STEP;
     angle_buf = SERVO_CENTER - angle * HANDLE_STEP;
+	
+	//ログのサイズに合わせる（暫定対応）
+	if(127 < angle)angle = 127;
+	if(angle < -128)angle = -128;
+	log_buf_handle = angle;
 }
 
 /************************************************************************/

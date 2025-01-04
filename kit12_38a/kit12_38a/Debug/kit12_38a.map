@@ -1,4 +1,4 @@
-Optimizing Linkage Editor (V.10.01.00.000)        22-Dec-2024 13:28:04
+Optimizing Linkage Editor (V.10.01.00.000)        04-Jan-2025 15:02:20
 
 *** Options ***
 
@@ -34,19 +34,19 @@ data_SO
 bss_SO
                                   00000400  00000400         0   1
 data_NE
-                                  00000400  00000435        36   2
+                                  00000400  00000437        38   2
 bss_NE
-                                  00000436  000005e3       1ae   2
+                                  00000438  000006f5       2be   2
 data_NO
-                                  000005e4  000005e4         1   1
+                                  000006f6  000016af       fba   1
 bss_NO
-                                  000005e5  000005e5         0   1
+                                  000016b0  0000191c       26d   1
 stack
-                                  000005e5  000007e4       200   1
+                                  0000191d  00001b1c       200   1
 istack
-                                  000007e5  000008e4       100   1
+                                  00001b1d  00001c1c       100   1
 heap_NE
-                                  000008e6  000008e6         0   2
+                                  00001c1e  00001c1e         0   2
 interrupt
                                   00004000  00004000         0   2
 data_SEI
@@ -54,15 +54,17 @@ data_SEI
 data_SOI
                                   00004000  00004000         0   1
 data_NEI
-                                  00004000  00004035        36   2
+                                  00004000  00004037        38   2
 data_NOI
-                                  00004036  00004036         1   1
+                                  00004038  00004ff1       fba   1
 program
-                                  00004038  00005bd8      1ba1   2
+                                  00004ff2  000091c7      41d6   2
 vector
                                   0000fed8  0000ffd7       100   2
 fvector
                                   0000ffd8  0000ffff        28   1
+rom_FO
+                                  00010000  0001014e       14f   1
 
 *** ID code information ***
 
