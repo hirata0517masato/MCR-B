@@ -31,7 +31,7 @@
 #define SERVO_CENTER    	16760          /* サーボのセンタ値             */
 
 
-#define RUN_TIME	24000	//走行時間
+#define RUN_TIME	40000	//走行時間
 
 //#define WallOn //レーンチェンジの壁があるときに有効化すること
 
@@ -394,17 +394,17 @@ void main( void )
 		
 			led_out( 1 );
 			
-			if(LR_cnt < 500){
+			if(LR_cnt < 200){
 				handle( 120 );
        			motor( 100 ,30 );
 				
-			}else if(LR_cnt < 1000){
+			}else if(LR_cnt < 400){
 				handle( 110 );
-       			motor( 100 , 70 );
+       			motor( 100 , 90 );
 					
 			}else{
 				handle( 110 );
-       			motor( 100 , 80 );
+       			motor( 100 , 90 );
 			}
 			
 		}else if((sensor_inp(MASK4_4)&0x80) != 0x00 ){ //1xxx xxxx 外寄りすぎ
@@ -414,11 +414,11 @@ void main( void )
 			
 			if(LR_cnt < 500){
 				handle( 110 );
-       			motor( 100 ,90 );
+       			motor( 100 ,95 );
 				
 			}else if(LR_cnt < 1000){
 				handle( 110 );
-       			motor( 100 ,95 );
+       			motor( 100 ,100 );
 				
 			}else{
 				handle( 110 );
@@ -496,17 +496,17 @@ void main( void )
 		
 			led_out( 1 );
 			
-			if(LR_cnt < 500){
+			if(LR_cnt < 200){
 				handle( -120 );
        			motor( 30 ,100 );
 				
-			}else if(LR_cnt < 1000){
+			}else if(LR_cnt < 400){
 				handle( -110 );
-       			motor( 70 ,100 );
+       			motor( 90 ,100 );
 					
 			}else{
 				handle( -110 );
-       			motor( 80 ,100 );
+       			motor( 90 ,100 );
 			}
 			
 		}else if((sensor_inp(MASK4_4)&0x01) != 0x00 ){ //xxxx xxx1 外寄りすぎ
@@ -516,11 +516,11 @@ void main( void )
 			
 			if(LR_cnt < 500){
 				handle( -110 );
-       			motor( 90 ,100 );
+       			motor( 95 ,100 );
 				
 			}else if(LR_cnt < 1000){
 				handle( -110 );
-       			motor( 95 ,100 );
+       			motor( 100 ,100 );
 					
 			}else{
 				handle( -110 );
@@ -565,13 +565,13 @@ void main( void )
         led_out( 0x3 );
         handle( 0 );
 		
-		if(S_cnt > 500){
+		if(S_cnt > 800){
         	motor( -100 ,-100 );
 			
-		}else if(S_cnt > 200){
+		}else if(S_cnt > 400){
 			motor( -50 ,-50 );
 			
-		}else if(S_cnt > 100){
+		}else if(S_cnt > 200){
 			motor( -20 ,-20 );
 		}else{
 			motor( 0 ,0 );	
@@ -613,17 +613,17 @@ void main( void )
             break;
         }
 
-        if(cnt1 > 120){
-			M = 80;
-		}else if(cnt1 > 160){
-			M = 80;
-		}else if(cnt1 > 150){
-			M = 80;
-		}else if(cnt1 > 130){
-			M = 80;
-		}else if(cnt1 > 100){
-			M = 70;
+        if(cnt1 > 90){
+			M = 90;
 		}else if(cnt1 > 80){
+			M = 100;
+		}else if(cnt1 > 70){
+			M = 90;
+		}else if(cnt1 > 60){
+			M = 80;
+		}else if(cnt1 > 50){
+			M = 70;
+		}else if(cnt1 > 40){
 			M = 60;
 		}else{
 			M = 50;
@@ -978,16 +978,23 @@ void main( void )
 			}
 #endif
 */
+
+/*		
+		if(cnt1 > 120){
+			handle( 0 );
+			motor( 50 ,100 );
+		}
+*/
         /* 右レーンチェンジ終了のチェック */
         //if( sensor_inp( MASK4_4 ) == 0x01 || sensor_inp( MASK4_4 ) == 0x03 ) { //0000 0001  //0000 0011
-		//if(cnt1 > 100 && sensor_inp( MASK4_4 )&0x01 != 0x00 ) { //xxxx xxx1
-		if(cnt1 > 100 && sensor_inp( MASK4_4 )&0x02 != 0x00 ) { //xxxx xx1x
+		if(cnt1 > 5 && sensor_inp( MASK4_4 )&0x01 != 0x00 ) { //xxxx xxx1
+		//if(cnt1 > 100 && sensor_inp( MASK4_4 )&0x02 != 0x00 ) { //xxxx xx1x
 #ifdef WallOn
             handle( -100 );
             motor( 10 ,100 );
 #else
-            handle( -100 );
-            motor( 10 ,100 );
+            handle( -130 );
+            motor( -50 ,100 );
 #endif
 		     
             pattern = 55;
@@ -999,7 +1006,7 @@ void main( void )
         /* 右レーンチェンジ終了のチェック */
         //if( sensor_inp( MASK4_4 ) == 0x60 ) { //0110 0000
 		//if(cnt1 > 100 && sensor_inp( MASK4_4 )&0x60 != 0x00 ) { //x11x xxxx
-		if(cnt1 > 100 && sensor_inp( MASK4_4 )&0xc0 != 0x00 ) { //11xx xxxx
+		if(cnt1 > 5 && sensor_inp( MASK4_4 )&0xc0 != 0x00 ) { //11xx xxxx
             led_out( 0x0 );
 
 #ifdef WallOn
@@ -1183,10 +1190,16 @@ void main( void )
             motor( 100 ,100 );
 		}
 #endif
-*/			
+*/	
+/*		
+		if(cnt1 > 120){
+			handle( 0 );
+			motor( 100 ,50 );
+		}
+*/		
         //if( sensor_inp( MASK4_4 ) == 0x80 || sensor_inp( MASK4_4 ) == 0xC0) { //1000 0000  //1100 0000
-		//if(cnt1 > 100 &&  sensor_inp( MASK4_4 )&0x80 != 0x00) { //1xxx xxxx
-		if(cnt1 > 100 &&  sensor_inp( MASK4_4 )&0x40 != 0x00) { //x1xx xxxx
+		if(cnt1 > 5 &&  sensor_inp( MASK4_4 )&0x80 != 0x00) { //1xxx xxxx
+		//if(cnt1 > 100 &&  sensor_inp( MASK4_4 )&0x40 != 0x00) { //x1xx xxxx
 
 #ifdef WallOn
 			handle( 130 );
@@ -1205,7 +1218,7 @@ void main( void )
         /* 左レーンチェンジ終了のチェック */
         //if( sensor_inp( MASK4_4 ) == 0x06 ) { //0000 0110
 		//if(cnt1 > 100 &&  sensor_inp( MASK4_4 )&0x06 != 0x00) { //xxxx x11x
-		if(cnt1 > 100 &&  sensor_inp( MASK4_4 )&0x03 != 0x00) { //xxxx xx11
+		if(cnt1 > 5 &&  sensor_inp( MASK4_4 )&0x03 != 0x00) { //xxxx xx11
             led_out( 0x0 );
 
 #ifdef WallOn
