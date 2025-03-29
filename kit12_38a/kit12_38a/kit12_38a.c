@@ -31,7 +31,7 @@
 #define SERVO_CENTER    	16760          /* サーボのセンタ値             */
 
 
-#define RUN_TIME	40000	//走行時間
+#define RUN_TIME	25000	//走行時間
 
 //#define WallOn //レーンチェンジの壁があるときに有効化すること
 
@@ -239,12 +239,12 @@ void main( void )
 			///////////////////////////////////////////////////////////右曲げ
 			
 			case 0x08://0000 1000
-				handle( 10 );
+				handle( 5 );
                 motor( s_motor ,s_motor );
                 break;
 			
 			case 0x0c://0000 1100
-				handle( 15 );
+				handle( 10 );
                 motor( s_motor ,s_motor );
                 break;
 				
@@ -297,12 +297,12 @@ void main( void )
 			///////////////////////////////////////////////////////左曲げ
 			
 			case 0x10://0001 0000
-                handle( -10 );
+                handle( -5 );
                 motor( s_motor ,s_motor );
                 break;
 			
 			case 0x30://0011 0000
-                handle( -15 );
+                handle( -10 );
                 motor( s_motor ,s_motor );
                 break;
 				
@@ -394,17 +394,21 @@ void main( void )
 		
 			led_out( 1 );
 			
-			if(LR_cnt < 200){
+			if(LR_cnt < 50){
 				handle( 120 );
-       			motor( 100 ,30 );
+       			motor( 100 ,0 );
+				
+			}else if(LR_cnt < 100){
+				handle( 120 );
+       			motor( 100 ,90 );
 				
 			}else if(LR_cnt < 400){
 				handle( 110 );
-       			motor( 100 , 90 );
+       			motor( 100 , 100 );
 					
 			}else{
 				handle( 110 );
-       			motor( 100 , 90 );
+       			motor( 100 , 100 );
 			}
 			
 		}else if((sensor_inp(MASK4_4)&0x80) != 0x00 ){ //1xxx xxxx 外寄りすぎ
@@ -412,9 +416,13 @@ void main( void )
 		
 			led_out( 1 );
 			
-			if(LR_cnt < 500){
+			if(LR_cnt < 50){
 				handle( 110 );
-       			motor( 100 ,95 );
+       			motor( 100 ,30 );
+				
+			}else if(LR_cnt < 200){
+				handle( 110 );
+       			motor( 100 ,90 );
 				
 			}else if(LR_cnt < 1000){
 				handle( 110 );
@@ -496,17 +504,21 @@ void main( void )
 		
 			led_out( 1 );
 			
-			if(LR_cnt < 200){
+			if(LR_cnt < 50){
 				handle( -120 );
-       			motor( 30 ,100 );
+       			motor( 0 ,100 );
+				
+			}else if(LR_cnt < 200){
+				handle( -120 );
+       			motor( 90 ,100 );
 				
 			}else if(LR_cnt < 400){
 				handle( -110 );
-       			motor( 90 ,100 );
+       			motor( 100 ,100 );
 					
 			}else{
 				handle( -110 );
-       			motor( 90 ,100 );
+       			motor( 100 ,100 );
 			}
 			
 		}else if((sensor_inp(MASK4_4)&0x01) != 0x00 ){ //xxxx xxx1 外寄りすぎ
@@ -514,9 +526,13 @@ void main( void )
 		
 			led_out( 1 );
 			
-			if(LR_cnt < 500){
+			if(LR_cnt < 50){
 				handle( -110 );
-       			motor( 95 ,100 );
+       			motor( 30 ,100 );
+				
+			}else if(LR_cnt < 200){
+				handle( -110 );
+       			motor( 90 ,100 );
 				
 			}else if(LR_cnt < 1000){
 				handle( -110 );
@@ -613,17 +629,17 @@ void main( void )
             break;
         }
 
-        if(cnt1 > 90){
-			M = 90;
-		}else if(cnt1 > 80){
-			M = 100;
-		}else if(cnt1 > 70){
-			M = 90;
-		}else if(cnt1 > 60){
+        if(cnt1 > 120){
+			M = 85;
+		}else if(cnt1 > 110){
 			M = 80;
-		}else if(cnt1 > 50){
+		}else if(cnt1 > 100){
+			M = 90;
+		}else if(cnt1 > 90){
+			M = 80;
+		}else if(cnt1 > 80){
 			M = 70;
-		}else if(cnt1 > 40){
+		}else if(cnt1 > 70){
 			M = 60;
 		}else{
 			M = 50;
@@ -979,12 +995,12 @@ void main( void )
 #endif
 */
 
-/*		
+		
 		if(cnt1 > 120){
-			handle( 0 );
-			motor( 50 ,100 );
+			handle( 50 );
+			motor( 50 ,50 );
 		}
-*/
+
         /* 右レーンチェンジ終了のチェック */
         //if( sensor_inp( MASK4_4 ) == 0x01 || sensor_inp( MASK4_4 ) == 0x03 ) { //0000 0001  //0000 0011
 		if(cnt1 > 5 && sensor_inp( MASK4_4 )&0x01 != 0x00 ) { //xxxx xxx1
@@ -1191,12 +1207,12 @@ void main( void )
 		}
 #endif
 */	
-/*		
+		
 		if(cnt1 > 120){
-			handle( 0 );
-			motor( 100 ,50 );
+			handle( -30 );
+			motor( 50 ,50 );
 		}
-*/		
+		
         //if( sensor_inp( MASK4_4 ) == 0x80 || sensor_inp( MASK4_4 ) == 0xC0) { //1000 0000  //1100 0000
 		if(cnt1 > 5 &&  sensor_inp( MASK4_4 )&0x80 != 0x00) { //1xxx xxxx
 		//if(cnt1 > 100 &&  sensor_inp( MASK4_4 )&0x40 != 0x00) { //x1xx xxxx
