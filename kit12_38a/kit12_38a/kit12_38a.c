@@ -605,13 +605,13 @@ void main( void )
         led_out( 0x3 );
         handle( 0 );
 		
-		if(S_cnt > 500){
+		if(S_cnt > 250){
         	motor( -100 ,-100 );
 			
-		}else if(S_cnt > 200){
+		}else if(S_cnt > 100){
 			motor( -50 ,-50 );
 			
-		}else if(S_cnt > 100){
+		}else if(S_cnt > 50){
 			motor( -20 ,-20 );
 		}else{
 			motor( 0 ,0 );	
@@ -625,7 +625,7 @@ void main( void )
         /* ÇQñ{ñ⁄Çì«Ç›îÚÇŒÇ∑ */
 		
 	
-		if( cnt1 > 100 ) {
+		if( cnt1 > 150 ) {
 	       pattern = 23;
 	       cnt1 = 0;
 	    }
@@ -670,17 +670,17 @@ void main( void )
 			M = 60;
 		}
 */		
-		if(cnt1 > 110){
+		if(cnt1 > 120){
 			M = 90;
+		}else if(cnt1 > 110){
+			M = 80;
 		}else if(cnt1 > 100){
-			M = 80;
-		}else if(cnt1 > 90){
 			M = 90;
-		}else if(cnt1 > 80){
+		}else if(cnt1 > 90){
 			M = 80;
-		}else if(cnt1 > 70){
+		}else if(cnt1 > 80){
 			M = 70;
-		}else if(cnt1 > 60){
+		}else if(cnt1 > 70){
 			M = 60;
 		}else{
 			M = 50;
@@ -951,7 +951,7 @@ void main( void )
             motor( 100 ,0 );
 #else
 			handle( 130 );
-			motor( 100 ,0 );
+			motor( 100 ,-50 );
 #endif
             pattern = 54;
             cnt1 = 0;
@@ -1070,6 +1070,19 @@ void main( void )
 			}
 #endif
 */
+#ifdef WallOn
+            handle( 130 );
+            motor( 100 ,0 );
+#else
+		if(cnt1 < 50){
+			handle( 130 );
+			motor( 100 , -50 );
+		}else{
+			handle( 130 );
+			motor( 100 ,0 );
+		}
+#endif
+
 
 		
 		if(cnt1 > 100){//120
@@ -1160,11 +1173,11 @@ void main( void )
         if(cnt1 > 100 &&  sensor_inp(MASK4_4) == 0x00 ) {
 
 #ifdef WallOn
-            handle( -80 );
+            handle( -130 );
             motor( 0 ,100 );
 #else
-            handle( -80 );
-			motor( 0 ,100 );
+            handle( -130 );
+			motor( -50 ,100 );
 #endif
 
             pattern = 64;
@@ -1283,9 +1296,22 @@ void main( void )
 		}
 #endif
 */	
-		
+
+#ifdef WallOn
+            handle( 130 );
+            motor( 100 ,0 );
+#else
+		if(cnt1 < 50){
+			handle( -130 );
+			motor( -50 , 100 );
+		}else{
+			handle( -130 );
+			motor( 0 , 100 );
+		}
+#endif
+	
 		if(cnt1 > 100){//120
-			handle( -30 );
+			handle( -50 );
 			motor( 50 ,50 );
 		}
 		
@@ -1294,11 +1320,11 @@ void main( void )
 		//if(cnt1 > 100 &&  sensor_inp( MASK4_4 )&0x40 != 0x00) { //x1xx xxxx
 
 #ifdef WallOn
-			handle( 130 );
-            motor( 100 ,-60 );
+			handle( 100 );
+            motor( 100 ,10 );
 #else
 			handle( 130 );
-            motor( 100 ,-60 );
+            motor( 100 ,-50 );
 #endif
 	  
             pattern = 65;
@@ -1314,11 +1340,11 @@ void main( void )
             led_out( 0x0 );
 
 #ifdef WallOn
-			handle( 130 );
-            motor( 100 ,-60 ); //ÉÅÉÇÅFç∂ÇÕêÿÇËï‘ÇµíxÇ¢ÇÃÇ≈-100Ç∆Ç∑ÇÈ
+			handle( 100 );
+            motor( 100 ,10 ); //ÉÅÉÇÅFç∂ÇÕêÿÇËï‘ÇµíxÇ¢ÇÃÇ≈-100Ç∆Ç∑ÇÈ
 #else
-			handle( 130 );
-            motor( 100 ,-60 ); 
+			handle( 100 );
+            motor( 100 , 10 ); 
 #endif
 			
 
