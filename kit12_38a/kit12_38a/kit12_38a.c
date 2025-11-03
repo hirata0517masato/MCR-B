@@ -31,7 +31,7 @@
 #define SERVO_CENTER    	17550          /* サーボのセンタ値             */
 
 
-#define RUN_TIME	15000	//走行時間
+#define RUN_TIME	22000	//走行時間
 
 #define WallOn //レーンチェンジの壁があるときに有効化すること
 
@@ -633,7 +633,7 @@ void main( void )
         if( check_leftline() ){// || ((sensor_inp(MASK4_4)&0xc0) == 0xc0)) {
             /* 左クランクと判断→左クランククリア処理へ */
             led_out( 0x1 );
-            handle( -150 );
+            handle( -250 );
             motor( -100 ,100 );
             pattern = 31;
             cnt1 = 0;
@@ -642,7 +642,7 @@ void main( void )
         if( check_rightline() ){// || ((sensor_inp(MASK4_4)&0x03) == 0x03)) {
             /* 右クランクと判断→右クランククリア処理へ */
             led_out( 0x2 );
-            handle( 150 );
+            handle( 250 );
             motor( 100 ,-100 );
             pattern = 41;
             cnt1 = 0;
@@ -668,7 +668,9 @@ void main( void )
 			M = 60;
 		}
 */		
-		if(cnt1 > 120){
+		if(cnt1 > 200){
+			M = 80;
+		}else if(cnt1 > 120){
 			M = 90;
 		}else if(cnt1 > 110){
 			M = 80;
@@ -807,7 +809,7 @@ void main( void )
 
 
     case 31:
-		if( sensor_inp(MASK4_4)& 0x38 != 0x00 ) { //xx11 1xxx 外より
+		if( sensor_inp(MASK4_4)& 0x78 != 0x00 ) { //x111 1xxx 外より
 			handle( -220 );
         	
 			if(cnt1 > 150){
@@ -819,10 +821,10 @@ void main( void )
 		}else{
 			handle( -200 );
         	
-			if(cnt1 > 250){
+			if(cnt1 > 300){
 				motor( 30 ,100 );//motor( 80 ,100 );
 				
-			}else if(cnt1 > 150){
+			}else if(cnt1 > 200){
 				motor( 10 ,100 );
 					
 			}else{
@@ -831,7 +833,7 @@ void main( void )
 		}
 			
         /* 左クランククリア処理　曲げ終わりのチェック */
-        if(cnt1 > 50 &&  (sensor_inp(MASK3_3) == 0xC0 || sensor_inp(MASK3_3) == 0x40 || sensor_inp(MASK3_3) == 0x80)){ //1100 0000  //0100 0000  //1000 0000
+        if(cnt1 > 50 &&  (sensor_inp(MASK4_4) == 0xC0 || sensor_inp(MASK4_4) == 0x40 || sensor_inp(MASK4_4) == 0x80)){ //1100 0000  //0100 0000  //1000 0000
             
             pattern = 32;
             cnt1 = 0;
@@ -842,15 +844,15 @@ void main( void )
         
 	case 32:
 		if( sensor_inp(MASK4_4)& 0x04 != 0x00 ) { //xxxx x1xx 外より
-			handle( -160 );
+			handle( -200 );
         	motor(  90 ,100 );
 		}else{
-			handle( -140 );
+			handle( -180 );
         	motor( 90 ,100 );
 		}
 		
         /* 左クランククリア処理　曲げ終わりのチェック */
-        if(cnt1 > 5 && ( sensor_inp(MASK3_3) == 0x60 ||  sensor_inp(MASK3_3) == 0x20 )){ //0110 0000 //0010 0000
+        if(cnt1 > 10 && ( sensor_inp(MASK4_4) == 0x60 ||  sensor_inp(MASK4_4) == 0x20 ||  sensor_inp(MASK4_4) == 0x18 ||  sensor_inp(MASK4_4) == 0x30 )){ //0110 0000 //0010 0000 //0001 1000 //0011 0000
             led_out( 0x0 );
             pattern = 11;
 			S_cnt = 0;
@@ -860,7 +862,7 @@ void main( void )
         break;
 		
     case 41:
-		if( sensor_inp(MASK4_4)& 0x1C != 0x00 ) { //xxx1 11xx 外より
+		if( sensor_inp(MASK4_4)& 0x1E != 0x00 ) { //xxx1 111x 外より
 			handle( 220 );
 			
         	if(cnt1 > 150){
@@ -871,10 +873,10 @@ void main( void )
 		}else{
 			handle( 200 );
 			
-			if(cnt1 > 250){
+			if(cnt1 > 300){
 				motor( 100 ,30 );//motor( 100 ,80 );
 				
-			}else if(cnt1 > 150){
+			}else if(cnt1 > 200){
 				motor( 100 ,10 );
 					
 			}else{
@@ -884,7 +886,7 @@ void main( void )
 		}
 			
         /* 右クランククリア処理　曲げ終わりのチェック */
-        if(cnt1 > 50 && ( sensor_inp(MASK3_3) == 0x03 || sensor_inp(MASK3_3) == 0x02 || sensor_inp(MASK3_3) == 0x01) ){ //0000 0011  //0000 0010 //0000 0001
+        if(cnt1 > 50 && ( sensor_inp(MASK4_4) == 0x03 || sensor_inp(MASK4_4) == 0x02 || sensor_inp(MASK4_4) == 0x01) ){ //0000 0011  //0000 0010 //0000 0001
             
             pattern = 42;
             cnt1 = 0;
@@ -895,15 +897,15 @@ void main( void )
 
     case 42:
 		if( sensor_inp(MASK4_4)& 0x20 != 0x00 ) { //xx1x xxxx 外より
-        	handle( 160 );
+        	handle( 200 );
         	motor( 100 , 90 );
 		}else{
-			handle( 140 );
+			handle( 180 );
         	motor( 100 ,90 );
 		}
 		
         /* 右クランククリア処理　曲げ終わりのチェック */
-        if(cnt1 > 5 &&  ( sensor_inp(MASK3_3) == 0x06 || sensor_inp(MASK3_3) == 0x04) ){ //0000 0110 //0000 0100
+        if(cnt1 > 10 &&  ( sensor_inp(MASK4_4) == 0x06 || sensor_inp(MASK4_4) == 0x04 || sensor_inp(MASK4_4) == 0x08 || sensor_inp(MASK4_4) == 0x0C) ){ //0000 0110 //0000 0100 //0001 1000 //0000 1100
             led_out( 0x0 );
             pattern = 11;
 			S_cnt = 0;
@@ -975,40 +977,40 @@ void main( void )
 			case 0x10://0001 0000
                 /* 微妙に左寄り→右へ微曲げ */
 
-				handle( 15 );
+				handle( 10 );
                 motor( M ,M );
                 break;
 			
 			case 0x18://0001 1000
                 /* 微妙に左寄り→右へ微曲げ */
 
-				handle( 20 );
+				handle( 15 );
                 motor( M ,M );
                 break;
 					
             case 0x08://0000 1000
                 /* 微妙に左寄り→右へ微曲げ */
    
-				handle( 25 );
+				handle( 20 );
                 motor( M ,M-10 );
                 break;
 
             case 0x0c://0000 1100
                 /* 少し左寄り→右へ小曲げ */
-                handle( 30 );
+                handle( 25 );
                 motor( M ,M-40 );
 				
                 break;
 			
 			case 0x0e://0000 1110
                 /* 少し左寄り→右へ小曲げ */
-                handle( 35 );
+                handle( 30 );
                 motor( M ,M-40 );
                 break;
 
             case 0x06://0000 0110
                 /* 大きく左寄り→右へ大曲げ */
-                handle( 40 );
+                handle( 35 );
                 motor( M ,M-40 );
                 break;
 				
@@ -1017,27 +1019,27 @@ void main( void )
 			case 0x20://0010 0000
                 /* 微妙に右寄り→左へ微曲げ */
 	
-				handle( -15 );
+				handle( -10 );
                 motor( M ,M );
                 break;
 			
 			case 0x60://0110 0000
                 /* 微妙に右寄り→左へ微曲げ */
 	
-				handle( -20 );
+				handle( -15 );
                 motor( M ,M );
                 break;
 					
             case 0x40://0100 0000
                 /* 微妙に右寄り→左へ微曲げ */
       	
-				handle( -25 );
+				handle( -20 );
                 motor( M-10 ,M );
                 break;
 
             case 0xc0://1100 0000
                 /* 少し右寄り→左へ小曲げ */
-				handle( -30 );
+				handle( -25 );
                 motor( M-40 ,M );
                 break;
 		/*	case 0xe0://1100 0000
@@ -1048,7 +1050,7 @@ void main( void )
 */
             case 0x80://1000 0000
                 /* 大きく右寄り→左へ大曲げ */
-                handle( -35 );
+                handle( -30 );
                 motor( M-40 ,M );
                 break;
         }
@@ -1070,10 +1072,10 @@ void main( void )
 */
 #ifdef WallOn
         if(cnt1 < 50){
-			handle( 120 );
+			handle( 130 );
 			motor( 100 , -50 );
 		}else{
-			handle( 120 );
+			handle( 130 );
 			motor( 100 ,0 );
 		}
 		
@@ -1088,7 +1090,7 @@ void main( void )
 #endif
 
 		
-		if(cnt1 > 80){//120
+		if(cnt1 > 90){//120
 			handle( 40 );
 			motor( 50 ,100 );
 		}
@@ -1205,27 +1207,27 @@ void main( void )
 			case 0x04://0000 0100
                 /* 微妙に左寄り→右へ微曲げ */
 
-				handle( 15 );
+				handle( 10 );
                 motor( M ,M );
                 break;
 			
 			case 0x06://0000 0110
                 /* 微妙に左寄り→右へ微曲げ */
 
-				handle( 20 );
+				handle( 15 );
                 motor( M ,M );
                 break;
 					
             case 0x02://0000 0010
                 /* 微妙に左寄り→右へ微曲げ */
    
-				handle( 25 );
+				handle( 20 );
                 motor( M ,M-10 );
                 break;
 
             case 0x03://0000 0011
                 /* 少し左寄り→右へ小曲げ */
-                handle( 30 );
+                handle( 25 );
                 motor( M ,M-40 );
 				
                 break;
@@ -1238,7 +1240,7 @@ void main( void )
 */
             case 0x01://0000 0001
                 /* 大きく左寄り→右へ大曲げ */
-                handle( 35 );
+                handle( 30 );
                 motor( M ,M-40 );
                 break;
 				
@@ -1247,38 +1249,38 @@ void main( void )
 			case 0x08://0000 1000
                 /* 微妙に右寄り→左へ微曲げ */
 	
-				handle( -15 );
+				handle( -10 );
                 motor( M ,M );
                 break;
 			
 			case 0x18://0001 1000
                 /* 微妙に右寄り→左へ微曲げ */
 	
-				handle( -20 );
+				handle( -15 );
                 motor( M ,M );
                 break;
 					
             case 0x10://0001 0000
                 /* 微妙に右寄り→左へ微曲げ */
       	
-				handle( -25 );
+				handle( -20 );
                 motor( M-10 ,M );
                 break;
 
             case 0x30://0011 0000
                 /* 少し右寄り→左へ小曲げ */
-				handle( -30 );
+				handle( -25 );
                 motor( M-40 ,M );
                 break;
 			case 0x70://0111 0000
                 /* 少し右寄り→左へ小曲げ */
-				handle( -35 );
+				handle( -30 );
                 motor( M-40 ,M );
                 break;
 
             case 0x60://0110 0000
                 /* 大きく右寄り→左へ大曲げ */
-                handle( -40 );
+                handle( -35 );
                 motor( M-40 ,M );
                 break;
         }
@@ -1302,10 +1304,10 @@ void main( void )
 
 #ifdef WallOn
         if(cnt1 < 50){
-			handle( -120 );
+			handle( -130 );
 			motor( -50 , 100 );
 		}else{
-			handle( -120 );
+			handle( -130 );
 			motor( 0 , 100 );
 		}
 #else
@@ -1318,7 +1320,7 @@ void main( void )
 		}
 #endif
 	
-		if(cnt1 > 80){//120
+		if(cnt1 > 90){//120
 			handle( -40 );
 			motor( 100 ,50 );
 		}

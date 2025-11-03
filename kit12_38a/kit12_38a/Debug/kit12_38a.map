@@ -1,4 +1,4 @@
-Optimizing Linkage Editor (V.10.01.00.000)        18-Oct-2025 20:31:23
+Optimizing Linkage Editor (V.10.01.00.000)        03-Nov-2025 16:45:03
 
 *** Options ***
 
@@ -58,7 +58,7 @@ data_NEI
 data_NOI
                                   00004038  00004ff1       fba   1
 program
-                                  00004ff2  00009683      4692   2
+                                  00004ff2  000096b9      46c8   2
 vector
                                   0000fed8  0000ffd7       100   2
 fvector
