@@ -28,10 +28,10 @@
 #define PWM_CYCLE       	9999           /* 駆動モータPWMの周期       1ms       								*/
 #define SERVO_PWM_CYCLE     10//16			   /* サーボモータPWMの周期     PWM_CYCLE * SERVO_PWM_CYCLE (ms)         */
 #define HANDLE_STEP     	14//22              /* 1゜分の値                    */
-#define SERVO_CENTER    	17550          /* サーボのセンタ値             */
+#define SERVO_CENTER    	17500          /* サーボのセンタ値    +左　-右         */
 
 
-#define RUN_TIME	28000	//走行時間
+#define RUN_TIME	23000	//走行時間
 
 #define WallOn //レーンチェンジの壁があるときに有効化すること
 
@@ -91,6 +91,11 @@ int log_start = 0;
 signed char log_buf_Lmotor,log_buf_Rmotor;
 signed char log_buf_handle;
 
+int InOut = 0; //0:指定なし　1:In 2:Out
+int C_cnt = 0;
+int C_time[3][5] = {{0,0,0,0,0},
+					{100,0,300,0,0},
+					{0,0,0,0,0}};
 
 /************************************************************************/
 /* メインプログラム                                                     */
@@ -109,6 +114,14 @@ void main( void )
     /* マイコンカーの状態初期化 */
     handle( 0 );
     motor( 0, 0 );
+	
+	
+	if( (dipsw_get() & 0x01) == 0x01 ) {
+		InOut = 1;
+	}else if( (dipsw_get() & 0x02) == 0x02 ) {
+		InOut = 2;
+	}
+	
 /*
 	while(1){
 		if(cnt0 > 500){
@@ -222,8 +235,10 @@ void main( void )
             break;
         }
 
-		
-		if(S_cnt > 9000){//指定時間以上直線が続いたら減速する（エンコーダでの速度制御風） T600x5 で500くらい
+		if(run_time < 100){//出だしの空転防止
+			s_motor = 50;
+			
+		}else if(S_cnt > 9000){//指定時間以上直線が続いたら減速する（エンコーダでの速度制御風） T600x5 で500くらい
 			s_motor = 90;
 		}else{
 			s_motor = 100;
@@ -614,7 +629,129 @@ void main( void )
 
         break;
 
-    case 21:
+	case 21:
+        /* 距離調整 */
+		
+	
+		if( cnt1 > C_time[InOut][C_cnt] ) {
+	       pattern = 22;
+	       cnt1 = 0;
+	    }
+	 	
+		motor( 100 ,100 );
+		
+		switch( sensor_inp(MASK4_4) ) {
+            case 0x18: //0001 1000
+                /* センタ→まっすぐ */
+
+				handle( 0 );
+          
+                break;
+			///////////////////////////////////////////////////////////
+			
+			case 0x08://0000 1000
+                /* 微妙に左寄り→右へ微曲げ */
+
+				handle( 8 );
+                
+                break;
+				
+			case 0x0C://0000 1100
+                /* 微妙に左寄り→右へ微曲げ */
+
+				handle( 10 );
+                
+                break;
+				
+            case 0x04://0000 0100
+                /* 微妙に左寄り→右へ微曲げ */
+   
+				handle( 15 );
+                
+                break;
+
+            case 0x06://0000 0110
+                /* 少し左寄り→右へ小曲げ */
+                handle( 20 );
+           
+				
+                break;
+
+			case 0x02://0000 0010
+                /* 少し左寄り→右へ小曲げ */
+                handle( 30 );
+              
+                break;
+
+            case 0x03://0000 0011
+                /* 大きく左寄り→右へ大曲げ */
+                handle( 40 );
+               
+                break;
+			
+			case 0x01://0000 0001
+                /* 大きく左寄り→右へ大曲げ */
+                handle( 40 );
+               
+                break;
+				
+				
+			///////////////////////////////////////////////////////
+			
+			case 0x10://0001 0000
+                /* 微妙に右寄り→左へ微曲げ */
+	
+				handle( -8 );
+               
+                break;
+				
+				
+			case 0x30://0011 0000
+                /* 微妙に右寄り→左へ微曲げ */
+	
+				handle( -10 );
+              
+                break;
+				
+            case 0x20://0010 0000
+                /* 微妙に右寄り→左へ微曲げ */
+      	
+				handle( -15 );
+               
+                break;
+
+            case 0x60://0110 0000
+                /* 少し右寄り→左へ小曲げ */
+				handle( -20 );
+               
+                break;
+			
+			 case 0x40://0100 0000
+                /* 少し右寄り→左へ小曲げ */
+				handle( -30 );
+              
+                break;
+			
+
+            case 0xc0://1100 0000
+                /* 大きく右寄り→左へ大曲げ */
+                handle( -40 );
+               
+                break;
+			
+			case 0x80://1000 0000
+                /* 大きく右寄り→左へ大曲げ */
+                handle( -40 );
+                motor( M-40 ,M );
+                break;
+			
+			
+        }
+  
+		
+        break;
+		
+    case 22:
         /* １本目のクロスライン検出時の処理 */
         led_out( 0x3 );
         handle( 0 );
@@ -631,16 +768,16 @@ void main( void )
 			motor( 0 ,0 );	
 		}
 		
-        pattern = 22;
+        pattern = 23;
         cnt1 = 0;
         break;
 
-    case 22:
+    case 23:
         /* ２本目を読み飛ばす */
 		
 	
 		if( cnt1 > 150 ) {//150
-	       pattern = 23;
+	       pattern = 24;
 	       cnt1 = 0;
 	    }
 	 	
@@ -755,7 +892,7 @@ void main( void )
 		
         break;
 
-    case 23:
+    case 24:
         /* クロスライン後のトレース、クランク検出 */
         if( check_leftline() ){// || ((sensor_inp(MASK4_4)&0xc0) == 0xc0)) {
             /* 左クランクと判断→左クランククリア処理へ */
@@ -982,6 +1119,7 @@ void main( void )
         if(cnt1 > 10 && ( sensor_inp(MASK4_4) == 0x60 ||  sensor_inp(MASK4_4) == 0x20 ||  sensor_inp(MASK4_4) == 0x18 ||  sensor_inp(MASK4_4) == 0x30 )){ //0110 0000 //0010 0000 //0001 1000 //0011 0000
             led_out( 0x0 );
             pattern = 11;
+			C_cnt++;
 			S_cnt = 0;
             cnt1 = 0;
         }
@@ -1035,6 +1173,7 @@ void main( void )
         if(cnt1 > 10 &&  ( sensor_inp(MASK4_4) == 0x06 || sensor_inp(MASK4_4) == 0x04 || sensor_inp(MASK4_4) == 0x08 || sensor_inp(MASK4_4) == 0x0C) ){ //0000 0110 //0000 0100 //0001 1000 //0000 1100
             led_out( 0x0 );
             pattern = 11;
+			C_cnt++;
 			S_cnt = 0;
             cnt1 = 0;
         }
