@@ -1651,7 +1651,7 @@ void main( void )
 */	
 
 #ifdef WallOn
-		if(cnt1 > Lc_motor[InOut][Lc_cnt]){//120
+		if(cnt1 > Lc_time[InOut][Lc_cnt]){//120
 			handle( -30 );
 			motor( 100 ,50 );
 			
@@ -1663,7 +1663,7 @@ void main( void )
 			motor( 0 , 100 );
 		}
 #else
-		if(cnt1 > Lc_motor[InOut][Lc_cnt]){//120
+		if(cnt1 > Lc_time[InOut][Lc_cnt]){//120
 			handle( -30 );
 			motor( 100 ,50 );
 			
